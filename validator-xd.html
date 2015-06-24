@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="fr">
+   <head>
+      <meta charset="utf-8">
+      <title>PEM task validator (same domain)</title>
+      <style>
+         #task-view {
+            width: 800px;
+            border: 1px solid #000000;
+            margin: 20px;
+         }
+      </style>
+
+      <script type="text/javascript" src="bower_components/jquery/dist/jquery.min.js"></script>
+      <script type="text/javascript" src="bower_components/pem-platform/task-xd-pr.js"></script>
+      <script type="text/javascript" src="validator.js"></script>
+   </head>
+   <body>
+      <p>This page will help you validate a task against PEM API specification.</p>
+      <input type="text" id="taskUrl" value=""></input>
+      <button onclick="loadUrl()">load url in iframe (does not load task)</button>
+      <br>
+      <iframe src="" id="task-view"></iframe>
+      <br>
+      <button onclick="loadTask();">load task (all views)</button><br>
+      <button onclick="getMetaData();">get metadata</button><br>
+      <button onclick="showViews();">show views: </button><input id="views" value='{"task":true,"solution":true,"hints":true,"editor":true}'></input><br>
+      <button onclick="getHeight();">get height</button><br>
+      <button onclick="reloadAnswer();">reload answer: </button><input id="answer" value=''></input><br>
+      <button onclick="getAnswer();">get answer</button><br>
+      <button onclick="reloadState();">reload state: </button><input id="state" value=''></input><br>
+      <button onclick="getState();">get state</button><br>
+      <button onclick="updateToken();">update token</button><br>
+      <button onclick="gradeTask();">grade task</button><input id="graderanswer" value=''></input><br>
+      <div><pre class="messages" style="clear: left;"></pre></div>
+   </body>
+</html>

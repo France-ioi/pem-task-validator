@@ -1,0 +1,13 @@
+{
+  "name": "pem-task-validator",
+  "version": "0.1.0",
+  "homepage": "https://github.com/France-ioi/pem-task-validator",
+  "authors": [
+    "France IOI"
+  ],
+  "description": "validator for pem tasks",
+  "license": "MIT",
+  "dependencies": {
+    "pem-platform": "France-ioi/pem-platform"
+  }
+}
