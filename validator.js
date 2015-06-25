@@ -6,7 +6,6 @@ function loadUrl () {
    var href = window.location.href;
    var root = window.location.href.substr(0, href.lastIndexOf('/'));
    var taskUrl = $('#taskUrl').val()+'#'+root;
-   console.error(taskUrl);
    $('#task-view').prop('src', taskUrl);
    taskLoaded = false;
 }
@@ -14,6 +13,10 @@ function loadUrl () {
 function msgLog(msg) {
    console.log(msg);
    $('.messages').append(msg+'<br>');
+}
+
+function clearLogs() {
+   $('.messages').html('');
 }
 
 function initTask (callback) {
@@ -68,9 +71,8 @@ function getHeight() {
 }
 
 function reloadAnswer() {
-   var answer = $('#answer').val();;
-   answer = answer ? JSON.parse(answer) : '';
-   msgLog('calling task.reloadAnswer('+(answer ? JSON.stringify(answer) : '')+')..');
+   var answer = $('#answer').val();
+   msgLog('calling task.reloadAnswer('+answer+')..');
    task.reloadAnswer(answer, function() {
       msgLog('answer loaded');
    });
@@ -85,8 +87,7 @@ function getAnswer() {
 
 function reloadState() {
    var state = $('#state').val();;
-   state = state ? JSON.parse(state) : '{}';
-   msgLog('calling task.reloadState('+JSON.stringify(state)+')..');
+   msgLog('calling task.reloadState('+state+')..');
    task.reloadState(state, function() {
       msgLog('state loaded');
    });
@@ -108,8 +109,7 @@ function updateToken() {
 
 function gradeTask() {
    var graderanswer = $('#graderanswer').val();;
-   graderanswer = graderanswer ? JSON.parse(graderanswer) : '{}';
-   msgLog('calling task.reloadAnswer('+(graderanswer ? JSON.stringify(graderanswer) : '')+')..');
+   msgLog('calling task.reloadAnswer('+graderanswer+')..');
    task.gradeTask(graderanswer, '', function(score, message, scoreToken) {
       msgLog('received from grader: score='+score+', message='+message+', scoreToken='+scoreToken);
    });
@@ -123,8 +123,8 @@ $(document).ready(function() {
       msgLog('receiving platform.validate('+mode+')');
    }
    platform.updateHeight = function(height) {
-      //$('#task-view').height(height);
-      msgLog('receiving platform.updateHeight('+height+')');
+      $('#task-view').height(height);
+      msgLog('receiving platform.updateHeight('+height+'), setting height of iframe');
    }
    platform.askHint = function() {
       msgLog('receiving platform.askHint()');
