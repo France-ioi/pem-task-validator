@@ -2,7 +2,7 @@
 <html lang="fr">
    <head>
       <meta charset="utf-8">
-      <title>PEM task validator (same domain)</title>
+      <title>PEM task validator (cross domain)</title>
       <style>
          #task-view {
             width: 800px;
@@ -14,11 +14,11 @@
       </style>
 
       <script type="text/javascript" src="bower_components/jquery/dist/jquery.min.js"></script>
-      <script type="text/javascript" src="bower_components/pem-platform/task-xd-pr.js"></script>
+      <script type="text/javascript" src="bower_components/pem-platform/task-pr.js"></script>
       <script type="text/javascript" src="validator.js"></script>
    </head>
    <body>
-      <p>This page will help you validate a task against PEM API specification (cross-domain version).</p>
+      <p>This page will help you validate a task against PEM API specification (same domain version).</p>
       <iframe src="" id="task-view"></iframe>
       <br>
       <button onclick="loadUrl()">load url in iframe (does not load task)</button><input type="text" size="50" id="taskUrl" value=""></input><br>
