@@ -67,6 +67,8 @@ function getHeight() {
    msgLog('calling task.getHeight()..');
    task.getHeight(function(height) {
       msgLog('got height: '+height);
+      msgLog('setting iframe height: '+height);
+      $('#task-view').height(height);
    });
 }
 
