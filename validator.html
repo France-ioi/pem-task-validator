@@ -23,6 +23,7 @@
       <br>
       <button onclick="loadUrl()">load url in iframe (does not load task)</button><input type="text" size="50" id="taskUrl" value=""></input><br>
       <button onclick="loadTask();">load task (all views)</button><br>
+      <button onclick="getViews();">get views</button><br>
       <button onclick="getMetaData();">get metadata</button><br>
       <button onclick="showViews();">show views: </button><input size="50" id="views" value='{"task":true,"solution":true,"hints":true,"editor":true}'></input><br>
       <button onclick="getHeight();">get height</button><br>
@@ -32,6 +33,7 @@
       <button onclick="getState();">get state</button><br>
       <button onclick="updateToken();">update token</button><br>
       <button onclick="gradeTask();">grade task</button><input size="50" id="graderanswer" value=''></input><br>
+      <button onclick="unloadTask();">unload task</button><br>
       <button onclick="clearLogs();">clear logs</button><br>
       <div><pre class="messages" style="clear: left;"></pre></div>
    </body>

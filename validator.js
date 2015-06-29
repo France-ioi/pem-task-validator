@@ -39,6 +39,36 @@ function loadTask() {
    });
 }
 
+function unloadTask() {
+   msgLog('calling task.unload...');
+   task.unload(function() {
+      taskLoaded = false;
+      msgLog('task.unload ok!');
+   });
+}
+
+function getViews() {
+   msgLog('calling task.getViews()..');
+   task.getViews(function(views) {
+      msgLog('got views: '+JSON.stringify(views));
+      if (!views.hasOwnProperty('task')) {
+         msgLog('<strong>error!</strong>missing "task" in returned views');
+      }
+      if (!views.hasOwnProperty('solution')) {
+         msgLog('<strong>error!</strong>missing "solution" in returned views');
+      }
+      if (!views.hasOwnProperty('hint')) {
+         msgLog('<strong>error!</strong>missing "hint" in returned views');
+      }
+      if (!views.hasOwnProperty('forum')) {
+         msgLog('<strong>error!</strong>missing "forum" in returned views');
+      }
+      if (!views.hasOwnProperty('editor')) {
+         msgLog('<strong>error!</strong>missing "editor" in returned views');
+      }
+   });
+}
+
 function getMetaData() {
    if (!task || !taskLoaded) {
       alert('please init and load task first');
@@ -48,6 +78,28 @@ function getMetaData() {
    task.getMetaData(function(metadata) {
       msgLog('task.getMetaData ok!');
       msgLog('received: '+JSON.stringify(metadata));
+      if (metadata.minWidth) {
+         $('#task-view').width(metadata.minWidth);
+         msgLog('setting iframe width to '+metadata.minWidth);
+      }
+      if (!metadata.hasOwnProperty('id')) {
+         msgLog('<strong>error!</strong>missing "id" in returned metadata');
+      }
+      if (!metadata.hasOwnProperty('language')) {
+         msgLog('<strong>error!</strong>missing "language" in returned metadata');
+      }
+      if (!metadata.hasOwnProperty('version')) {
+         msgLog('<strong>error!</strong>missing "version" in returned metadata');
+      }
+      if (!metadata.hasOwnProperty('title')) {
+         msgLog('<strong>error!</strong>missing "title" in returned metadata');
+      }
+      if (!metadata.hasOwnProperty('authors')) {
+         msgLog('<strong>error!</strong>missing "authors" in returned metadata');
+      }
+      if (!metadata.hasOwnProperty('license')) {
+         msgLog('<strong>error!</strong>missing "license" in returned metadata');
+      }
    });
 }
 
