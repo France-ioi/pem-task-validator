@@ -1,13 +1,93 @@
 var task;
+var grader;
 var platform;
 var taskLoaded = false;
+var urlLoaded = false;
+
+Date.prototype.tokenFormat = function() {
+   var yyyy = this.getFullYear().toString();
+   var mm = (this.getMonth()+1).toString();
+   var dd  = this.getDate().toString();
+   return (dd[1]?dd:"0"+dd[0]) + '-' + (mm[1]?mm:"0"+mm[0]) + '-' + yyyy;
+};
+
+function toggleTokens() {
+   if (urlLoaded) {
+      alert('you must enable or disable tokens before loading the iframe, please reload the page');
+      return false;
+   }
+   var today = new Date();
+   today = today.tokenFormat();
+   $('#grade-date').val(today);
+   $('#date').val(today);
+   $('#main-token-fields').toggleClass('hidden');
+   $('#grade-token-fields').toggleClass('hidden');
+}
+
+var publicKey = "";
+var privateKey = "";
+
+function getTokenParams() {
+   publicKey = $('#publickey').val();
+   privateKey = $('#privatekey').val();
+   var res = {};
+   res['date'] = $('#date').val().toString();
+   res['idUser'] = $('#idUser').val().toString();
+   res['idItem'] = $('#idItem').val().toString();
+   res['platform'] = $('#platform').val().toString();
+   res['nbHintsGiven'] = parseInt($('#nbHintsGiven').val());
+   res['bHintsAllowed'] = $('#bHintsAllowed').is(":checked");
+   res['bAuthorsDisplayed'] = $('#bAuthorsDisplayed').is(":checked");
+   res['bAllowPrivateMetaData'] = $('#bAllowPrivateMetaData').is(":checked");
+   res['bReadOnly'] = $('#bReadOnly').is(":checked");
+   res['bAllowGrading'] = $('#bAllowGrading').is(":checked");
+   res['bHasFullAccess'] = $('#bHasFullAccess').is(":checked");
+   res['bAccessSolutions'] = $('#bAccessSolutions').is(":checked");
+   res['bSubmissionPossible'] = $('#bSubmissionPossible').is(":checked");
+   return res;
+}
+
+function getGraderTokenParams() {
+   var res = {};
+   res['date'] = $('#grade-date').val().toString();
+   res['idUser'] = $('#grade-idUser').val().toString();
+   res['idItem'] = $('#grade-idItem').val().toString();
+   res['platform'] = $('#grade-platform').val().toString();
+   res['sAnswer'] = $('#grade-sAnswer').val().toString();
+   return res;
+}
+
+function buildToken(grader, callback) {
+   var tokenParams = grader ? getGraderTokenParams() : getTokenParams();
+   msgLog('building token...');
+   $.post('buildToken.php', {privateKey: privateKey, tokenParams: tokenParams}, function(token) {
+      console.log('token: '+token);
+      msgLog('token received');
+      callback(token);
+   });
+}
+
+mainToken = '';
+
+function getToken() {
+   buildToken(false, function(token) {
+      mainToken = token;
+   });
+}
 
 function loadUrl () {
    var href = window.location.href;
    var root = window.location.href.substr(0, href.lastIndexOf('/'));
-   var taskUrl = $('#taskUrl').val()+'#'+root;
+   if (!$('#main-token-fields').hasClass('hidden')) {
+      var myurl = $('#taskUrl').val()
+      var separator = (myurl.indexOf('?') === -1) ? '?' : '&';
+      var taskUrl = myurl+separator+'sToken='+mainToken+'#'+root;
+   } else {
+      var taskUrl = $('#taskUrl').val()+'#'+root;
+   }
    $('#task-view').prop('src', taskUrl);
    taskLoaded = false;
+   urlLoaded = true;
 }
 
 function msgLog(msg) {
@@ -21,7 +101,8 @@ function clearLogs() {
 
 function initTask (callback) {
    TaskProxyManager.getTaskProxy('task-view', function(resTask) {
-      task = resTask
+      task = resTask;
+      grader = resTask;
       TaskProxyManager.setPlatform(task, platform);
       msgLog('task initialized');
       callback();
@@ -155,18 +236,29 @@ function getState() {
 }
 
 function updateToken() {
-   msgLog('calling task.updateToken()..');
-   task.updateToken('abc', function() {
-      msgLog('token updated');
+   buildToken(false, function(token) {
+      msgLog('calling task.updateToken()..');
+      task.updateToken(token, function() {
+         msgLog('token updated');
+      });
    });
 }
 
 function gradeTask() {
-   var graderanswer = $('#graderanswer').val();;
-   msgLog('calling task.reloadAnswer('+graderanswer+')..');
-   task.gradeTask(graderanswer, '', function(score, message, scoreToken) {
-      msgLog('received from grader: score='+score+', message='+message+', scoreToken='+scoreToken);
-   });
+   var graderanswer = $('#graderanswer').val();
+   if (!$('#main-token-fields').hasClass('hidden')) {
+      buildToken(true, function(token){
+         msgLog('calling grader.gradeTask('+graderanswer+')..');
+         grader.gradeTask(graderanswer, token, function(score, message, scoreToken) {
+            msgLog('received from grader: score='+score+', message='+message+', scoreToken='+scoreToken);
+         });
+      });
+   } else {
+      msgLog('calling task.reloadAnswer('+graderanswer+')..');
+      grader.gradeTask(graderanswer, '', function(score, message, scoreToken) {
+         msgLog('received from grader: score='+score+', message='+message+', scoreToken='+scoreToken);
+      });
+   }
 }
 
 $(document).ready(function() {

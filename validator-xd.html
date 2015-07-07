@@ -2,14 +2,17 @@
 <html lang="fr">
    <head>
       <meta charset="utf-8">
-      <title>PEM task validator (same domain)</title>
+      <title>PEM task validator (cross domain)</title>
       <style>
          #task-view {
-            width: 1200px;
+            width: 800px;
             border: 1px solid #000000;
             margin: 20px;
             float:right;
             height:500px;
+         }
+         .hidden {
+            display:none;
          }
       </style>
 
@@ -18,9 +21,29 @@
       <script type="text/javascript" src="validator.js"></script>
    </head>
    <body>
-      <p>This page will help you validate a task against PEM API specification (cross-domain version).</p>
+      <p>This page will help you validate a task against PEM API specification (same domain version).</p>
       <iframe src="" id="task-view"></iframe>
       <br>
+      Use tokens? <input type="checkbox" name="bHintsAllowed" value="1" onchange="toggleTokens();"><br>
+      <div id="main-token-fields" class="hidden">
+         private key:<br><textarea id="privatekey" rows="15" cols="66"></textarea><br>
+<!--         public key:<br><textarea id="publickey" rows="15" cols="66"></textarea><br>-->
+         Token fields:<br>
+         date: <input type="text" size="50" id="date" value=""></input><br>
+         idUser:  <input type="text" size="50" id="idUser" value="1"></input><br>
+         idItem:  <input type="text" size="50" id="idItem" value="1"></input><br>
+         platform: <input type="text" size="50" id="platform" value="1"></input><br>
+         bHintsAllowed: <input type="checkbox" name="bHintsAllowed" checked><br>
+         nbHintsGiven: <input type="text" size="50" id="nbHintsGiven" value="1"></input><br>
+         bAuthorsDisplayed: <input type="checkbox" name="bAuthorsDisplayed" checked><br>
+         bAllowPrivateMetaData: <input type="checkbox" name="bAllowPrivateMetaData" checked><br>
+         bReadOnly: <input type="checkbox" name="bReadOnly" checked><br>
+         bAllowGrading: <input type="checkbox" name="bAllowGrading" checked><br>
+         bHasFullAccess: <input type="checkbox" name="bHasFullAccess" checked><br>
+         bAccessSolutions: <input type="checkbox" name="bAccessSolutions" checked><br>
+         bSubmissionPossible: <input type="checkbox" name="bSubmissionPossible" checked><br>
+      </div>
+      <button onclick="getToken()">get token (do it before loading url)</button>
       <button onclick="loadUrl()">load url in iframe (does not load task)</button><input type="text" size="50" id="taskUrl" value=""></input><br>
       <button onclick="loadTask();">load task (all views)</button><br>
       <button onclick="getViews();">get views</button><br>
@@ -31,8 +54,16 @@
       <button onclick="getAnswer();">get answer</button><br>
       <button onclick="reloadState();">reload state: </button><input size="50" id="state" value=''></input><br>
       <button onclick="getState();">get state</button><br>
-      <button onclick="updateToken();">update token</button><br>
-      <button onclick="gradeTask();">grade task</button><input size="50" id="graderanswer" value=''></input><br>
+      <button onclick="updateToken();">update token (takes values of the first form)</button><br>
+      <div id="grade-token-fields"  class="hidden">
+         Grade token fields:<br>
+         date: <input type="text" size="50" id="grade-date" value=""></input><br>
+         idUser:  <input type="text" size="50" id="grade-idUser" value="1"></input><br>
+         idItem:  <input type="text" size="50" id="grade-idItem" value="1"></input><br>
+         platform: <input type="text" size="50" id="grade-platform" value="1"></input><br>
+         sAnswer (must match graded answer): <input type="text" size="50" id="grade-sAnswer" value="1"></input><br>
+      </div>
+      <button onclick="gradeTask();">grade answer</button><input size="50" id="graderanswer" value=''></input><br>
       <button onclick="unloadTask();">unload task</button><br>
       <button onclick="clearLogs();">clear logs</button><br>
       <div><pre class="messages" style="clear: left;"></pre></div>
