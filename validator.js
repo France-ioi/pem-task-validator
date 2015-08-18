@@ -95,13 +95,13 @@ function loadUrl() {
    var href = window.location.href;
    var root = window.location.href.substr(0, href.lastIndexOf('/'));
    var myurl = $('#taskUrl').val();
-   //sameDomain(myurl);
-   /*$.getScript( "ajax/test.js", function( data, textStatus, jqxhr ) {
-      console.log( data ); // Data returned
-      console.log( textStatus ); // Success
-      console.log( jqxhr.status ); // 200
-      console.log( "Load was performed." );
-   });*/
+   if(sameDomain(myurl)) {
+      $.getScript("bower_components/pem-platform/task-pr.js");
+   }
+   else {
+      $.getScript("bower_components/pem-platform/task-xd-pr.js");
+   }
+   $.getScript("validator.js");
    if(myurl === "") {
       $('#error-taskUrl').css("visibility", "visible");
    }
@@ -308,7 +308,11 @@ function gradeTask() {
    }
 }
 
-$(document).ready(function () {
+function loadPlatform() {
+   if(typeof task === "undefined") {
+      setTimeout(loadPlatform, 250);
+      return;
+   }
    // task-proxy.js provides a Platform class
    platform = new Platform(task);
    // we implement a few methods:
@@ -329,4 +333,8 @@ $(document).ready(function () {
       views = JSON.stringify(views);
       msgLog('receiving platform.showViews(' + views + ')');
    };
+}
+
+$(document).ready(function () {
+   loadPlatform();
 });
