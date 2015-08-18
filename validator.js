@@ -75,10 +75,33 @@ function getToken() {
    });
 }
 
+/*function getDomain() {
+   reg = new RegExp("\/\/(.*)" + location.pathname);
+   return reg.exec(location.href)[1];
+}*/
+
+function getDomainOf(url) {
+   var r = url.split("/")[2];
+   return r === "127.0.0.1" ? "localhost" : r;
+}
+
+function sameDomain(url) {
+   if(!/\/\//.test(url))
+      return true;
+   return getDomainOf(location.href) === getDomainOf(url);
+}
+
 function loadUrl() {
    var href = window.location.href;
    var root = window.location.href.substr(0, href.lastIndexOf('/'));
    var myurl = $('#taskUrl').val();
+   //sameDomain(myurl);
+   /*$.getScript( "ajax/test.js", function( data, textStatus, jqxhr ) {
+      console.log( data ); // Data returned
+      console.log( textStatus ); // Success
+      console.log( jqxhr.status ); // 200
+      console.log( "Load was performed." );
+   });*/
    if(myurl === "") {
       $('#error-taskUrl').css("visibility", "visible");
    }

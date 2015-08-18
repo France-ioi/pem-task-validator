@@ -22,16 +22,18 @@
 
       <script type="text/javascript" src="bower_components/jquery/dist/jquery.min.js"></script>
       <script type="text/javascript" src="bower_components/pem-platform/task-xd-pr.js"></script>
+      <!--script type="text/javascript" src="bower_components/pem-platform/task-pr.js"></script-->
       <script type="text/javascript" src="validator.js"></script>
    </head>
    <body>
       <p>This page will help you validate a task against PEM API specification (same domain version).</p>
       <iframe src="" id="task-view"></iframe>
       <br>
+      answerToken (gradeTask): date, platform, idUser, idItem, sAnswer
       Use tokens? <input type="checkbox" name="bHintsAllowed" value="1" onchange="toggleTokens();"><br>
       <div id="main-token-fields" class="hidden">
          private key:<br><textarea id="privatekey" rows="15" cols="66"></textarea><br>
-<!--         public key:<br><textarea id="publickey" rows="15" cols="66"></textarea><br>-->
+         <!--         public key:<br><textarea id="publickey" rows="15" cols="66"></textarea><br>-->
          Token fields:<br>
          date: <input type="text" size="50" id="date" value="" /><br>
          idUser:  <input type="text" size="50" id="idUser" value="1" /><br>
