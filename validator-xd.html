@@ -21,11 +21,37 @@
       </style>
 
       <script type="text/javascript" src="bower_components/jquery/dist/jquery.min.js"></script>
-      <script type="text/javascript" src="validator.js"></script>
+      <!--script type="text/javascript" src="bower_components/pem-platform/task-xd-pr.js"></script-->
+      <!--script type="text/javascript" src="validator.js"></script-->
+      <script>
+         function checkState(domain) {
+            $('#domain').prop('checked', domain);
+            $('#cross-domain').prop('checked', !domain);
+         }
+         
+         function loadTaskPr(domain) {
+            isDomain = domain;
+            $('#domain').attr("onclick", "checkState(" + domain + ");");
+            $('#cross-domain').attr("onclick", "checkState(" + domain + ");");
+            if(domain) {
+               $.getScript("bower_components/pem-platform/task-pr.js");
+            }
+            else {
+               $.getScript("bower_components/pem-platform/task-xd-pr.js");
+            }
+            $.getScript("validator.js");
+         }
+      </script>
    </head>
    <body>
       <p>This page will help you validate a task against PEM API specification (same domain version).</p>
       <iframe src="" id="task-view"></iframe>
+      <br>
+      Validator
+      <div id="select-domain" style="display:inline">
+         <input id="domain" type="radio" name="domain" onclick="loadTaskPr(1);"> Domain
+         <input id="cross-domain" type="radio" name="domain" onclick="loadTaskPr(0);"> Cross-domain
+      </div>
       <br>
       answerToken (gradeTask): date, platform, idUser, idItem, sAnswer
       Use tokens? <input type="checkbox" name="bHintsAllowed" value="1" onchange="toggleTokens();"><br>

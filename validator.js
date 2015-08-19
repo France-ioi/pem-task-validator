@@ -95,13 +95,7 @@ function loadUrl() {
    var href = window.location.href;
    var root = window.location.href.substr(0, href.lastIndexOf('/'));
    var myurl = $('#taskUrl').val();
-   if(sameDomain(myurl)) {
-      $.getScript("bower_components/pem-platform/task-pr.js");
-   }
-   else {
-      $.getScript("bower_components/pem-platform/task-xd-pr.js");
-   }
-   $.getScript("validator.js");
+   //loadTaskPr(sameDomain(myurl));
    if(myurl === "") {
       $('#error-taskUrl').css("visibility", "visible");
    }
@@ -309,10 +303,11 @@ function gradeTask() {
 }
 
 function loadPlatform() {
-   if(typeof task === "undefined") {
+   /*if(typeof task === "undefined") {
+      alert("arrr !")
       setTimeout(loadPlatform, 250);
       return;
-   }
+   }*/
    // task-proxy.js provides a Platform class
    platform = new Platform(task);
    // we implement a few methods:
