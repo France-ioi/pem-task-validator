@@ -78,7 +78,7 @@ function getToken() {
 /*function getDomain() {
    reg = new RegExp("\/\/(.*)" + location.pathname);
    return reg.exec(location.href)[1];
-}*/
+}
 
 function getDomainOf(url) {
    var r = url.split("/")[2];
@@ -89,7 +89,7 @@ function sameDomain(url) {
    if(!/\/\//.test(url))
       return true;
    return getDomainOf(location.href) === getDomainOf(url);
-}
+}*/
 
 function loadUrl() {
    var href = window.location.href;
@@ -97,10 +97,10 @@ function loadUrl() {
    var myurl = $('#taskUrl').val();
    //loadTaskPr(sameDomain(myurl));
    if(myurl === "") {
-      $('#error-taskUrl').css("visibility", "visible");
+      $('#error-emptyTaskUrl').css("visibility", "visible");
    }
    else {
-      $('#error-taskUrl').css("visibility", "hidden");
+      $('#error-emptyTaskUrl').css("visibility", "hidden");
       if (!$('#main-token-fields').hasClass('hidden')) {
          var separator = (myurl.indexOf('?') === -1) ? '?' : '&';
          var taskUrl = myurl + separator + 'sToken=' + mainToken + '#' + root;
@@ -154,7 +154,9 @@ function unloadTask() {
 function getViews() {
    msgLog('calling task.getViews()..');
    task.getViews(function (views) {
-      msgLog('got views: ' + JSON.stringify(views));
+      var strView = JSON.stringify(views);
+      msgLog('got views: ' + strView);
+      $('#code-viewer').val(strView);
       if (!views.hasOwnProperty('task')) {
          msgLog('<strong>error!</strong>missing "task" in returned views');
       }
@@ -212,11 +214,18 @@ function showViews() {
       alert('please init and load task first');
       return;
    }
-   var views = JSON.parse($('#views').val());
-   msgLog('calling task.showViews(' + JSON.stringify(views) + ')..');
-   task.showViews(views, function () {
-      msgLog('views loaded');
-   });
+   var strViews = $('#views').val();
+   if (strViews === "") {
+      $('#error-views').css("visibility", "visible");
+   }
+   else {
+      $('#error-views').css("visibility", "hidden");
+      var views = JSON.parse(strViews);
+      msgLog('calling task.showViews(' + strViews + ')..');
+      task.showViews(views, function () {
+         msgLog('views loaded');
+      });
+   }
 }
 
 function getHeight() {
@@ -246,6 +255,7 @@ function getAnswer() {
    msgLog('calling task.getAnswer()..');
    task.getAnswer(function (answer) {
       msgLog('got answer: ' + answer);
+      $('#code-viewer').val(answer);
    });
 }
 
@@ -267,6 +277,7 @@ function getState() {
    msgLog('calling task.getState()..');
    task.getState(function (state) {
       msgLog('got state : ' + state);
+      $('#code-viewer').val(state);
    });
 }
 
