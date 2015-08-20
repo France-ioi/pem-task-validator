@@ -200,6 +200,7 @@ function getMetaData() {
       return;
    }
    msgLog(id_, 'calling task.getMetaData...');
+   var timer = setTimeout(function () { msgLog(id_, "Timeout, task didn't answer."); }, TIME_TO_WAIT);
    task.getMetaData(function (metadata) {
       msgLog(id_, 'task.getMetaData ok!');
       msgLog(id_, 'received: ' + JSON.stringify(metadata));
@@ -225,6 +226,7 @@ function getMetaData() {
       if (!metadata.hasOwnProperty('license')) {
          msgLog(id_, '<strong>error!</strong>missing "license" in returned metadata');
       }
+      clearTimeout(timer);
    });
 }
 
@@ -242,8 +244,10 @@ function showViews() {
       $('#error-views').css("visibility", "hidden");
       var views = JSON.parse(strViews);
       msgLog(id_, 'calling task.showViews(' + strViews + ')..');
+      var timer = setTimeout(function () { msgLog(id_, "Timeout, task didn't answer."); }, TIME_TO_WAIT);
       task.showViews(views, function () {
          msgLog(id_, 'views loaded');
+         clearTimeout(timer);
       });
    }
 }
@@ -251,10 +255,12 @@ function showViews() {
 function getHeight() {
    var id_ = id++;
    msgLog(id_, 'calling task.getHeight()..');
+   var timer = setTimeout(function () { msgLog(id_, "Timeout, task didn't answer."); }, TIME_TO_WAIT);
    task.getHeight(function (height) {
       msgLog(id_, 'got height: ' + height);
       msgLog(id_, 'setting iframe height: ' + height);
       $('#task-view').height(height);
+      clearTimeout(timer);
    });
 }
 
@@ -267,8 +273,10 @@ function reloadAnswer() {
       var id_ = id++;
       $('#error-answer').css("visibility", "hidden");
       msgLog(id_, 'calling task.reloadAnswer(' + answer + ')..');
+      var timer = setTimeout(function () { msgLog(id_, "Timeout, task didn't answer."); }, TIME_TO_WAIT);
       task.reloadAnswer(answer, function () {
          msgLog(id_, 'answer loaded');
+         clearTimeout(timer);
       });
    }
 }
@@ -276,9 +284,11 @@ function reloadAnswer() {
 function getAnswer() {
    var id_ = id++;
    msgLog(id_, 'calling task.getAnswer()..');
+   var timer = setTimeout(function () { msgLog(id_, "Timeout, task didn't answer."); }, TIME_TO_WAIT);
    task.getAnswer(function (answer) {
       msgLog(id_, 'got answer: ' + answer);
       $('#code-viewer').val(answer);
+      clearTimeout(timer);
    });
 }
 
@@ -291,8 +301,10 @@ function reloadState() {
       var id_ = id++;
       $('#error-emptyState').css("visibility", "hidden");
       msgLog(id_, 'calling task.reloadState(' + state + ')..');
+      var timer = setTimeout(function () { msgLog(id_, "Timeout, task didn't answer."); }, TIME_TO_WAIT);
       task.reloadState(state, function () {
          msgLog(id_, 'state loaded');
+         clearTimeout(timer);
       });
    }
 }
@@ -300,18 +312,22 @@ function reloadState() {
 function getState() {
    var id_ = id++;
    msgLog(id_, 'calling task.getState()..');
+   var timer = setTimeout(function () { msgLog(id_, "Timeout, task didn't answer."); }, TIME_TO_WAIT);
    task.getState(function (state) {
       msgLog(id_, 'got state : ' + state);
       $('#code-viewer').val(state);
+      clearTimeout(timer);
    });
 }
 
 function updateToken() {
    var id_ = id++;
    buildToken(false, function (token) {
+      var timer = setTimeout(function () { msgLog(id_, "Timeout, task didn't answer."); }, TIME_TO_WAIT);
       msgLog(id_, 'calling task.updateToken()..');
       task.updateToken(token, function () {
          msgLog(id_, 'token updated');
+         clearTimeout(timer);
       });
    });
 }
@@ -327,14 +343,18 @@ function gradeTask() {
       if (!$('#main-token-fields').hasClass('hidden')) {
          buildToken(true, function (token) {
             msgLog(id_, 'calling grader.gradeTask(' + graderanswer + ')..');
+            var timer = setTimeout(function () { msgLog(id_, "Timeout, task didn't answer."); }, TIME_TO_WAIT);
             grader.gradeTask(graderanswer, token, function (score, message, scoreToken) {
                msgLog(id_, 'received from grader: score=' + score + ', message=' + message + ', scoreToken=' + scoreToken);
+               clearTimeout(timer);
             });
          });
       } else {
          msgLog(id_, 'calling task.reloadAnswer(' + graderanswer + ')..');
+         var timer = setTimeout(function () { msgLog(id_, "Timeout, task didn't answer."); }, TIME_TO_WAIT);
          grader.gradeTask(graderanswer, '', function (score, message, scoreToken) {
             msgLog(id_, 'received from grader: score=' + score + ', message=' + message + ', scoreToken=' + scoreToken);
+            clearTimeout(timer);
          });
       }
    }
