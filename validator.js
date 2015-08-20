@@ -3,6 +3,7 @@ var grader;
 var platform;
 var taskLoaded = false;
 var urlLoaded = false;
+var id = 1;
 
 Date.prototype.tokenFormat = function () {
    var yyyy = this.getFullYear().toString();
@@ -58,11 +59,12 @@ function getGraderTokenParams() {
 }
 
 function buildToken(grader, callback) {
+   var id_ = id++;
    var tokenParams = grader ? getGraderTokenParams() : getTokenParams();
-   msgLog('building token...');
+   msgLog(id_, 'building token...');
    $.post('buildToken.php', {privateKey: privateKey, tokenParams: tokenParams}, function (token) {
       console.log('token: ' + token);
-      msgLog('token received');
+      msgLog(id_, 'token received');
       callback(token);
    });
 }
@@ -113,13 +115,14 @@ function loadUrl() {
    }
 }
 
-function msgLog(msg) {
-   console.log(msg);
-   $('.messages').append(msg + '<br>');
+function msgLog(id_, msg) {
+   console.log(id_ + '. ' + msg);
+   $('.messages').append(id_ + '. ' + msg + '<br>');
 }
 
 function clearLogs() {
    $('.messages').html('');
+   id = 1;
 }
 
 function initTask(callback) {
@@ -127,84 +130,90 @@ function initTask(callback) {
       task = resTask;
       grader = resTask;
       TaskProxyManager.setPlatform(task, platform);
-      msgLog('task initialized');
-      callback();
+      id_ = callback();
+      msgLog(id_, 'task initialized');
    }, true);
 }
 
 function loadTask() {
-   msgLog('initializing task...');
+   var id_ = id++;
+   msgLog(id_, 'initializing task...');
    initTask(function () {
-      msgLog('calling task.load...');
+      msgLog(id_, 'calling task.load...');
       task.load({'task': true, 'grader': true, 'metadata': true, 'solution': true, 'hints': true, 'forum': true, 'editor': true}, function () {
          taskLoaded = true;
-         msgLog('task.load ok!');
+         msgLog(id_, 'task.load ok!');
       });
+      //little trick to have loadTask and initTask with the same id in logs
+      return id_;
    });
 }
 
 function unloadTask() {
-   msgLog('calling task.unload...');
+   var id_ = id++;
+   msgLog(id_, 'calling task.unload...');
    task.unload(function () {
       taskLoaded = false;
-      msgLog('task.unload ok!');
+      msgLog(id_, 'task.unload ok!');
    });
 }
 
 function getViews() {
-   msgLog('calling task.getViews()..');
+   var id_ = id++;
+   msgLog(id_, 'calling task.getViews()..');
    task.getViews(function (views) {
       var strView = JSON.stringify(views);
-      msgLog('got views: ' + strView);
+      msgLog(id_, 'got views: ' + strView);
       $('#code-viewer').val(strView);
       if (!views.hasOwnProperty('task')) {
-         msgLog('<strong>error!</strong>missing "task" in returned views');
+         msgLog(id_, '<strong>error!</strong>missing "task" in returned views');
       }
       if (!views.hasOwnProperty('solution')) {
-         msgLog('<strong>error!</strong>missing "solution" in returned views');
+         msgLog(id_, '<strong>error!</strong>missing "solution" in returned views');
       }
       if (!views.hasOwnProperty('hint')) {
-         msgLog('<strong>error!</strong>missing "hint" in returned views');
+         msgLog(id_, '<strong>error!</strong>missing "hint" in returned views');
       }
       if (!views.hasOwnProperty('forum')) {
-         msgLog('<strong>error!</strong>missing "forum" in returned views');
+         msgLog(id_, '<strong>error!</strong>missing "forum" in returned views');
       }
       if (!views.hasOwnProperty('editor')) {
-         msgLog('<strong>error!</strong>missing "editor" in returned views');
+         msgLog(id_, '<strong>error!</strong>missing "editor" in returned views');
       }
    });
 }
 
 function getMetaData() {
+   var id_ = id++;
    if (!task || !taskLoaded) {
       alert('please init and load task first');
       return;
    }
-   msgLog('calling task.getMetaData...');
+   msgLog(id_, 'calling task.getMetaData...');
    task.getMetaData(function (metadata) {
-      msgLog('task.getMetaData ok!');
-      msgLog('received: ' + JSON.stringify(metadata));
+      msgLog(id_, 'task.getMetaData ok!');
+      msgLog(id_, 'received: ' + JSON.stringify(metadata));
       if (metadata.minWidth) {
          $('#task-view').width(metadata.minWidth);
-         msgLog('setting iframe width to ' + metadata.minWidth);
+         msgLog(id_, 'setting iframe width to ' + metadata.minWidth);
       }
       if (!metadata.hasOwnProperty('id')) {
-         msgLog('<strong>error!</strong>missing "id" in returned metadata');
+         msgLog(id_, '<strong>error!</strong>missing "id" in returned metadata');
       }
       if (!metadata.hasOwnProperty('language')) {
-         msgLog('<strong>error!</strong>missing "language" in returned metadata');
+         msgLog(id_, '<strong>error!</strong>missing "language" in returned metadata');
       }
       if (!metadata.hasOwnProperty('version')) {
-         msgLog('<strong>error!</strong>missing "version" in returned metadata');
+         msgLog(id_, '<strong>error!</strong>missing "version" in returned metadata');
       }
       if (!metadata.hasOwnProperty('title')) {
-         msgLog('<strong>error!</strong>missing "title" in returned metadata');
+         msgLog(id_, '<strong>error!</strong>missing "title" in returned metadata');
       }
       if (!metadata.hasOwnProperty('authors')) {
-         msgLog('<strong>error!</strong>missing "authors" in returned metadata');
+         msgLog(id_, '<strong>error!</strong>missing "authors" in returned metadata');
       }
       if (!metadata.hasOwnProperty('license')) {
-         msgLog('<strong>error!</strong>missing "license" in returned metadata');
+         msgLog(id_, '<strong>error!</strong>missing "license" in returned metadata');
       }
    });
 }
@@ -219,20 +228,22 @@ function showViews() {
       $('#error-views').css("visibility", "visible");
    }
    else {
+      var id_ = id++;
       $('#error-views').css("visibility", "hidden");
       var views = JSON.parse(strViews);
-      msgLog('calling task.showViews(' + strViews + ')..');
+      msgLog(id_, 'calling task.showViews(' + strViews + ')..');
       task.showViews(views, function () {
-         msgLog('views loaded');
+         msgLog(id_, 'views loaded');
       });
    }
 }
 
 function getHeight() {
-   msgLog('calling task.getHeight()..');
+   var id_ = id++;
+   msgLog(id_, 'calling task.getHeight()..');
    task.getHeight(function (height) {
-      msgLog('got height: ' + height);
-      msgLog('setting iframe height: ' + height);
+      msgLog(id_, 'got height: ' + height);
+      msgLog(id_, 'setting iframe height: ' + height);
       $('#task-view').height(height);
    });
 }
@@ -243,18 +254,20 @@ function reloadAnswer() {
       $('#error-answer').css("visibility", "visible");
    }
    else {
+      var id_ = id++;
       $('#error-answer').css("visibility", "hidden");
-      msgLog('calling task.reloadAnswer(' + answer + ')..');
+      msgLog(id_, 'calling task.reloadAnswer(' + answer + ')..');
       task.reloadAnswer(answer, function () {
-         msgLog('answer loaded');
+         msgLog(id_, 'answer loaded');
       });
    }
 }
 
 function getAnswer() {
-   msgLog('calling task.getAnswer()..');
+   var id_ = id++;
+   msgLog(id_, 'calling task.getAnswer()..');
    task.getAnswer(function (answer) {
-      msgLog('got answer: ' + answer);
+      msgLog(id_, 'got answer: ' + answer);
       $('#code-viewer').val(answer);
    });
 }
@@ -265,27 +278,30 @@ function reloadState() {
       $('#error-state').css("visibility", "visible");
    }
    else {
+      var id_ = id++;
       $('#error-state').css("visibility", "hidden");
-      msgLog('calling task.reloadState(' + state + ')..');
+      msgLog(id_, 'calling task.reloadState(' + state + ')..');
       task.reloadState(state, function () {
-         msgLog('state loaded');
+         msgLog(id_, 'state loaded');
       });
    }
 }
 
 function getState() {
-   msgLog('calling task.getState()..');
+   var id_ = id++;
+   msgLog(id_, 'calling task.getState()..');
    task.getState(function (state) {
-      msgLog('got state : ' + state);
+      msgLog(id_, 'got state : ' + state);
       $('#code-viewer').val(state);
    });
 }
 
 function updateToken() {
+   var id_ = id++;
    buildToken(false, function (token) {
-      msgLog('calling task.updateToken()..');
+      msgLog(id_, 'calling task.updateToken()..');
       task.updateToken(token, function () {
-         msgLog('token updated');
+         msgLog(id_, 'token updated');
       });
    });
 }
@@ -296,24 +312,26 @@ function gradeTask() {
       $('#error-graderanswer').css("visibility", "visible");
    }
    else {
+      var id_ = id++;
       $('#error-graderanswer').css("visibility", "hidden");
       if (!$('#main-token-fields').hasClass('hidden')) {
          buildToken(true, function (token) {
-            msgLog('calling grader.gradeTask(' + graderanswer + ')..');
+            msgLog(id_, 'calling grader.gradeTask(' + graderanswer + ')..');
             grader.gradeTask(graderanswer, token, function (score, message, scoreToken) {
-               msgLog('received from grader: score=' + score + ', message=' + message + ', scoreToken=' + scoreToken);
+               msgLog(id_, 'received from grader: score=' + score + ', message=' + message + ', scoreToken=' + scoreToken);
             });
          });
       } else {
-         msgLog('calling task.reloadAnswer(' + graderanswer + ')..');
+         msgLog(id_, 'calling task.reloadAnswer(' + graderanswer + ')..');
          grader.gradeTask(graderanswer, '', function (score, message, scoreToken) {
-            msgLog('received from grader: score=' + score + ', message=' + message + ', scoreToken=' + scoreToken);
+            msgLog(id_, 'received from grader: score=' + score + ', message=' + message + ', scoreToken=' + scoreToken);
          });
       }
    }
 }
 
 function loadPlatform() {
+   var id_ = id++;
    /*if(typeof task === "undefined") {
       alert("arrr !")
       setTimeout(loadPlatform, 250);
@@ -323,21 +341,21 @@ function loadPlatform() {
    platform = new Platform(task);
    // we implement a few methods:
    platform.validate = function (mode) {
-      msgLog('receiving platform.validate(' + mode + ')');
+      msgLog(id_, 'receiving platform.validate(' + mode + ')');
    };
    platform.updateHeight = function (height) {
       $('#task-view').height(height);
-      msgLog('receiving platform.updateHeight(' + height + '), setting height of iframe');
+      msgLog(id_, 'receiving platform.updateHeight(' + height + '), setting height of iframe');
    };
    platform.askHint = function () {
-      msgLog('receiving platform.askHint()');
+      msgLog(id_, 'receiving platform.askHint()');
    };
    platform.openUrl = function (id) {
-      msgLog('receiving platform.openUrl(' + id + ')');
+      msgLog(id_, 'receiving platform.openUrl(' + id + ')');
    };
    platform.showViews = function (views) {
       views = JSON.stringify(views);
-      msgLog('receiving platform.showViews(' + views + ')');
+      msgLog(id_, 'receiving platform.showViews(' + views + ')');
    };
 }
 
