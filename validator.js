@@ -1,3 +1,5 @@
+var TIME_TO_WAIT = 30000;
+
 var task;
 var grader;
 var platform;
@@ -61,11 +63,13 @@ function getGraderTokenParams() {
 function buildToken(grader, callback) {
    var id_ = id++;
    var tokenParams = grader ? getGraderTokenParams() : getTokenParams();
+   timer = setTimeout(function () { msgLog(id_, "Timeout, task didn't answer."); }, TIME_TO_WAIT);
    msgLog(id_, 'building token...');
    $.post('buildToken.php', {privateKey: privateKey, tokenParams: tokenParams}, function (token) {
       console.log('token: ' + token);
       msgLog(id_, 'token received');
       callback(token);
+      clearTimeout(timer);
    });
 }
 
@@ -138,11 +142,13 @@ function initTask(callback) {
 function loadTask() {
    var id_ = id++;
    msgLog(id_, 'initializing task...');
+   var timer = setTimeout(function () { msgLog(id_, "Timeout, task didn't answer."); }, TIME_TO_WAIT);
    initTask(function () {
       msgLog(id_, 'calling task.load...');
       task.load({'task': true, 'grader': true, 'metadata': true, 'solution': true, 'hints': true, 'forum': true, 'editor': true}, function () {
          taskLoaded = true;
          msgLog(id_, 'task.load ok!');
+         clearTimeout(timer);
       });
       //little trick to have loadTask and initTask with the same id in logs
       return id_;
@@ -152,15 +158,18 @@ function loadTask() {
 function unloadTask() {
    var id_ = id++;
    msgLog(id_, 'calling task.unload...');
+   var timer = setTimeout(function () { msgLog(id_, "Timeout, task didn't answer."); }, TIME_TO_WAIT);
    task.unload(function () {
       taskLoaded = false;
       msgLog(id_, 'task.unload ok!');
+      clearTimeout(timer);
    });
 }
 
 function getViews() {
    var id_ = id++;
    msgLog(id_, 'calling task.getViews()..');
+   var timer = setTimeout(function () { msgLog(id_, "Timeout, task didn't answer."); }, TIME_TO_WAIT);
    task.getViews(function (views) {
       var strView = JSON.stringify(views);
       msgLog(id_, 'got views: ' + strView);
@@ -180,6 +189,7 @@ function getViews() {
       if (!views.hasOwnProperty('editor')) {
          msgLog(id_, '<strong>error!</strong>missing "editor" in returned views');
       }
+      clearTimeout(timer);
    });
 }
 
@@ -275,11 +285,11 @@ function getAnswer() {
 function reloadState() {
    var state = $('#state').val();
    if (state === "") {
-      $('#error-state').css("visibility", "visible");
+      $('#error-emptyState').css("visibility", "visible");
    }
    else {
       var id_ = id++;
-      $('#error-state').css("visibility", "hidden");
+      $('#error-emptyState').css("visibility", "hidden");
       msgLog(id_, 'calling task.reloadState(' + state + ')..');
       task.reloadState(state, function () {
          msgLog(id_, 'state loaded');
