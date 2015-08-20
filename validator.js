@@ -266,10 +266,11 @@ function getHeight() {
 
 function reloadAnswer() {
    var answer = $('#answer').val();
-   if (answer === "") {
-      $('#error-answer').css("visibility", "visible");
+   var ok = true;
+   if(answer === "") {
+      ok = confirm("Do you really want to reset?");
    }
-   else {
+   if(ok) {
       var id_ = id++;
       $('#error-answer').css("visibility", "hidden");
       msgLog(id_, 'calling task.reloadAnswer(' + answer + ')..');
@@ -278,6 +279,9 @@ function reloadAnswer() {
          msgLog(id_, 'answer loaded');
          clearTimeout(timer);
       });
+   }
+   else {
+      $('#error-answer').css("visibility", "visible");
    }
 }
 
