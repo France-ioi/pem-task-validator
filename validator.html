@@ -4,12 +4,19 @@
       <meta charset="utf-8">
       <title>PEM task validator</title>
       <style>
+         #right-container {
+            width:800px;
+            margin:20px;
+            float:right;
+         }
          #task-view {
             width:800px;
             border:1px solid #000000;
-            margin:20px;
-            float:right;
+            margin-top:100px;
             height:500px;
+         }
+         #select-domain {
+             display:inline;
          }
          .hidden {
             display:none;
@@ -48,10 +55,13 @@
    </head>
    <body>
       <p>This page will help you validate a task against PEM API specification.</p>
-      <iframe src="" id="task-view"></iframe>
+      <div id="right-container">
+         <div id="select-json">Test lol</div>
+         <iframe src="" id="task-view"></iframe>
+      </div>
       <br>
       Validator:
-      <div id="select-domain" style="display:inline">
+      <div id="select-domain">
          <input id="domain" type="radio" name="domain" onclick="loadTaskPr(1);"> Domain
          <input id="cross-domain" type="radio" name="domain" onclick="loadTaskPr(0);"> Cross-domain
       </div>

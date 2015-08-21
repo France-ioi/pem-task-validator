@@ -429,15 +429,14 @@ function loadJSON(filename) {
    $.getJSON(filename, function (data) {
       var items = [];
       $.each(data, function (key, val) {
-         $.each(val, function (key_, val_) {
-            items.push("<li>" + key_ + ":" + val_ + "</li>");
-         });
-         items.push("<br />");
+         if(typeof val.type !== "undefined" && (val.type === "state" || val.type === "answer")) {
+            $.each(val, function (key_, val_) {
+               items.push("<li>" + key_ + ":" + val_ + "</li>");
+            });
+            items.push("<br />");
+         }
       });
-
-      $("<ul />", {
-         html: items.join("")
-      }).appendTo("body");
+      $("#select-json").html(items);
    });
 }
 
