@@ -16,7 +16,7 @@
             height:500px;
          }
          #select-domain {
-             display:inline;
+            display:inline;
          }
          .hidden {
             display:none;
@@ -24,26 +24,79 @@
          .error {
             display:inline;
             visibility:hidden;
+            color:#ff0000;
          }
       </style>
-
+      <style type="text/css">
+         .tab
+         {
+            display:inline-block;
+            margin-left:3px;
+            margin-right:3px;
+            padding:3px;
+            border:1px solid black;
+            cursor:pointer;
+         }
+         .tab_0
+         {
+            background:#bbbbbb;
+            border-bottom:1px solid black;
+         }
+         .tab_1
+         {
+            background:#dddddd;
+            border-bottom:0px solid black;
+            padding-bottom:4px;
+         }
+         .tab_content
+         {
+            background-color:#dddddd;
+            border:1px solid black;
+            margin-top:-1px;
+            padding:5px;
+            display:none;
+         }
+         ul
+         {
+            margin-top:0px;
+            margin-bottom:0px;
+            margin-left:-10px
+         }
+         h1
+         {
+            margin:0px;
+            padding:0px;
+         }
+      </style>
       <script type="text/javascript" src="bower_components/jquery/dist/jquery.min.js"></script>
+      <script type="text/javascript">
+         //<!--
+         function change_tab(name)
+         {
+            document.getElementById('tab_' + anc_tab).className = 'tab_0 tab';
+            document.getElementById('tab_' + name).className = 'tab_1 tab';
+            document.getElementById('tab_content_' + anc_tab).style.display = 'none';
+            document.getElementById('tab_content_' + name).style.display = 'block';
+            anc_tab = name;
+         }
+         //-->
+      </script>
       <script>
          //redefined when task-pr is loaded
          function loadUrl() {
             $('#error-emptyDomain').css("visibility", "visible");
          }
-         
+
          function checkState(domain) {
             $('#domain').prop('checked', domain);
             $('#cross-domain').prop('checked', !domain);
          }
-         
+
          function loadTaskPr(domain) {
             $('#error-emptyDomain').css("visibility", "hidden");
             $('#domain').attr("onclick", "checkState(" + domain + ");");
             $('#cross-domain').attr("onclick", "checkState(" + domain + ");");
-            if(domain) {
+            if (domain) {
                $.getScript("bower_components/pem-platform/task-pr.js");
             }
             else {
@@ -56,7 +109,29 @@
    <body>
       <p>This page will help you validate a task against PEM API specification.</p>
       <div id="right-container">
-         <div id="select-json">Test lol</div>
+         <div class="systeme_tabs">
+            <div class="tabs">
+               <span class="tab_0 tab" id="tab_quoi" onclick="change_tab('quoi');">Quoi</span>
+               <span class="tab_0 tab" id="tab_qui" onclick="change_tab('qui');">Qui</span>
+               <span class="tab_0 tab" id="tab_pourquoi" onclick="change_tab('pourquoi');">Pourquoi</span>
+            </div>
+            <div class="tab_contents">
+               <div class="tab_content" id="tab_content_quoi">
+                  <h1>Quoi?</h1>
+                  Un simple syst&egrave;me d'tab utilisant les technologies:<br />
+                  <div id="select-json">Here is shown the JSON.</div>
+               </div>
+               <div class="tab_content" id="tab_content_qui">
+                  <h1>Qui?</h1>
+                  C'est un script r&eacute;alis&eacute; par Ybouane,<br />
+                  Webmaster du site <a href="http://www.supportduweb.com/">http://www.supportduweb.com/</a>
+               </div>
+               <div class="tab_content" id="tab_content_pourquoi">
+                  <h1>Pourquoi?</h1>
+                  Pour simplifier la navigation et la diviser en parties
+               </div>
+            </div>
+         </div>
          <iframe src="" id="task-view"></iframe>
       </div>
       <br>
@@ -66,6 +141,8 @@
          <input id="cross-domain" type="radio" name="domain" onclick="loadTaskPr(0);"> Cross-domain
       </div>
       <br>
+      <button onclick="loadJSON();">load JSON file</button><input type="text" size="50" id="json" />
+      <span class="error" id="error-emptyJSONUrl">Warning, empty field.</span><br>
       answerToken (gradeTask): date, platform, idUser, idItem, sAnswer
       Use tokens? <input type="checkbox" name="bHintsAllowed" value="1" onchange="toggleTokens();"><br>
       <div id="main-token-fields" class="hidden">
@@ -116,6 +193,10 @@
       <button onclick="unloadTask();">unload task</button><br>
       <button onclick="clearLogs();">clear logs</button><br>
       <textarea id="code-viewer" rows="4" cols="50"></textarea>
-      <div><pre class="messages" style="clear: left;"></pre></div>
+      <div><pre class="messages" style="clear:left;"></pre></div>
+      <script type="text/javascript">
+         var anc_tab = 'quoi';
+         change_tab(anc_tab);
+      </script>
    </body>
 </html>

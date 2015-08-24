@@ -422,22 +422,32 @@ function loadPlatform() {
 }
 
 $(document).ready(function () {
+   alert("document ready");
    loadPlatform();
 });
 
 function loadJSON(filename) {
-   $.getJSON(filename, function (data) {
-      var items = [];
-      $.each(data, function (key, val) {
-         if(typeof val.type !== "undefined" && (val.type === "state" || val.type === "answer")) {
-            $.each(val, function (key_, val_) {
-               items.push("<li>" + key_ + ":" + val_ + "</li>");
-            });
-            items.push("<br />");
-         }
+   if (typeof filename === "undefined") {
+      filename = $('#json').val();
+   }
+   if (filename === "") {
+      $('#error-emptyJSONUrl').css("visibility", "visible");
+   }
+   else {
+      $('#error-emptyJSONUrl').css("visibility", "hidden");
+      $.getJSON(filename, function (data) {
+         var items = [];
+         $.each(data, function (key, val) {
+            if (typeof val.type !== "undefined" && (val.type === "state" || val.type === "answer")) {
+               $.each(val, function (key_, val_) {
+                  items.push("<li>" + key_ + ":" + val_ + "</li>");
+               });
+               items.push("<br />");
+            }
+         });
+         $("#select-json").html(items);
       });
-      $("#select-json").html(items);
-   });
+   }
 }
 
 loadJSON("test.json");
