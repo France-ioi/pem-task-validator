@@ -394,11 +394,6 @@ function gradeTask() {
 
 function loadPlatform() {
    var id_ = id++;
-   /*if(typeof task === "undefined") {
-    alert("arrr !")
-    setTimeout(loadPlatform, 250);
-    return;
-    }*/
    // task-proxy.js provides a Platform class
    platform = new Platform(task);
    // we implement a few methods:
@@ -422,7 +417,7 @@ function loadPlatform() {
 }
 
 $(document).ready(function () {
-   alert("document ready");
+   //alert("document ready");
    loadPlatform();
 });
 
@@ -436,18 +431,27 @@ function loadJSON(filename) {
    else {
       $('#error-emptyJSONUrl').css("visibility", "hidden");
       $.getJSON(filename, function (data) {
-         var items = [];
          $.each(data, function (key, val) {
+            var content = "";
+            var name = "";
             if (typeof val.type !== "undefined" && (val.type === "state" || val.type === "answer")) {
                $.each(val, function (key_, val_) {
-                  items.push("<li>" + key_ + ":" + val_ + "</li>");
+                  if (key_ !== "name") {
+                     content += "<li>" + key_ + ":" + val_ + "</li>";
+                  }
+                  else {
+                     name = val_;
+                  }
                });
-               items.push("<br />");
+               $(".tabs").append('<span class="tab_unselected tab" id="tab_' + key + '" onclick="change_tab(\'' + key + '\');">' + name + '</span>');
+               $(".tab_contents").append('<div class="tab_content" id="tab_content_' + key + '"><h1>' + name + '</h1>' + content + '</div>');
             }
          });
-         $("#select-json").html(items);
       });
    }
 }
 
 loadJSON("test.json");
+/*
+ $(".tabs").append('<span class="tab_0 tab" id="tab_lol" onclick="change_tab(\'' + "lol" + '\');">Lol</span>');
+ $(".tab_contents").append('<div class="tab_content" id="tab_content_lol"><h1>Toto?</h1>C<div id="select-json">Here is shown the JSON.</div></div>');*/
