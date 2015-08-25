@@ -6,6 +6,7 @@ var platform;
 var taskLoaded = false;
 var urlLoaded = false;
 var id = 1;
+var jsonContent;
 
 Date.prototype.tokenFormat = function () {
    var yyyy = this.getFullYear().toString();
@@ -278,8 +279,10 @@ function getHeight() {
    });
 }
 
-function reloadAnswer() {
-   var answer = $('#answer').val();
+function reloadAnswer(answer) {
+   if(typeof answer === "undefined") {
+      answer = $('#answer').val();
+   }
    var ok = true;
    if (answer === "") {
       ok = confirm("Do you really want to reset?");
@@ -314,8 +317,10 @@ function getAnswer() {
    });
 }
 
-function reloadState() {
-   var state = $('#state').val();
+function reloadState(state) {
+   if(typeof state === "undefined") {
+      state = $('#state').val();
+   }
    if (state === "") {
       $('#error-emptyState').css("visibility", "visible");
    }
@@ -431,6 +436,7 @@ function loadJSON(filename) {
    else {
       $('#error-emptyJSONUrl').css("visibility", "hidden");
       $.getJSON(filename, function (data) {
+         jsonContent = data;
          $.each(data, function (key, val) {
             var content = "";
             var name = "";
@@ -451,7 +457,5 @@ function loadJSON(filename) {
    }
 }
 
+var anc_tab = "0";
 loadJSON("test.json");
-/*
- $(".tabs").append('<span class="tab_0 tab" id="tab_lol" onclick="change_tab(\'' + "lol" + '\');">Lol</span>');
- $(".tab_contents").append('<div class="tab_content" id="tab_content_lol"><h1>Toto?</h1>C<div id="select-json">Here is shown the JSON.</div></div>');*/

@@ -77,8 +77,12 @@
             $('#tab_content_' + anc_tab).hide();
             $('#tab_content_' + name).show();
             anc_tab = name;
-            //modifier code_viewer
-            //donner la possibilité de charger
+            if(jsonContent[name].type === "answer") {
+               reloadAnswer(jsonContent[name].content);
+            }
+            else {
+               reloadState(jsonContent[name].content);
+            }
          }
       </script>
       <script>
@@ -110,15 +114,8 @@
       <p>This page will help you validate a task against PEM API specification.</p>
       <div id="right-container">
          <div class="tab_system">
-            <div class="tabs">
-               <span class="tab_unselected tab" id="tab_quoi" onclick="change_tab('quoi');">Quoi</span>
-            </div>
-            <div class="tab_contents">
-               <div class="tab_content" id="tab_content_quoi">
-                  <h1>Quoi?</h1>
-                  A
-               </div>
-            </div>
+            <div class="tabs"></div>
+            <div class="tab_contents"></div>
          </div>
          <iframe src="" id="task-view"></iframe>
       </div>
@@ -182,9 +179,5 @@
       <button onclick="clearLogs();">clear logs</button><br>
       <textarea id="code-viewer" rows="4" cols="50"></textarea>
       <div><pre class="messages" style="clear:left;"></pre></div>
-      <script type="text/javascript">
-         var anc_tab = 'quoi';
-         change_tab(anc_tab);
-      </script>
    </body>
 </html>
