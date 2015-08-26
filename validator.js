@@ -1,4 +1,4 @@
-var TIME_TO_WAIT = 30000;
+var TIME_TO_WAIT = 3000;
 
 var task;
 var grader;
@@ -425,6 +425,32 @@ $(document).ready(function() {
    loadPlatform();
 });
 
+function isJSONLink(string) {
+   return /.*\.json$/.test(string);
+}
+
+function processJSONContent(data) {
+   if (typeof data !== "undefined") {
+      jsonContent = data;
+   }
+   $.each(jsonContent, function(key, val) {
+      var content = "";
+      var name = "";
+      if (typeof val.type !== "undefined" && (val.type === "state" || val.type === "answer")) {
+         $.each(val, function(key_, val_) {
+            if (key_ !== "name") {
+               content += "<li>" + key_ + ":" + val_ + "</li>";
+            }
+            else {
+               name = val_;
+            }
+         });
+         $(".tabs").append('<span class="tab_unselected tab" id="tab_' + key + '" onclick="change_tab(\'' + key + '\');">' + name + '</span>');
+         $(".tab_contents").append('<div class="tab_content" id="tab_content_' + key + '"><h1>' + name + '</h1>' + content + '</div>');
+      }
+   });
+}
+
 function loadJSON(filename) {
    if (typeof filename === "undefined") {
       filename = $('#json').val();
@@ -434,25 +460,23 @@ function loadJSON(filename) {
    }
    else {
       $('#error-emptyJSONUrl').css("visibility", "hidden");
-      $.getJSON(filename, function(data) {
-         jsonContent = data;
-         $.each(data, function(key, val) {
-            var content = "";
-            var name = "";
-            if (typeof val.type !== "undefined" && (val.type === "state" || val.type === "answer")) {
-               $.each(val, function(key_, val_) {
-                  if (key_ !== "name") {
-                     content += "<li>" + key_ + ":" + val_ + "</li>";
-                  }
-                  else {
-                     name = val_;
-                  }
-               });
-               $(".tabs").append('<span class="tab_unselected tab" id="tab_' + key + '" onclick="change_tab(\'' + key + '\');">' + name + '</span>');
-               $(".tab_contents").append('<div class="tab_content" id="tab_content_' + key + '"><h1>' + name + '</h1>' + content + '</div>');
-            }
+      $(".tabs").empty();
+      $(".tab_contents").empty();
+      alert("let's get started shall we");
+      if (isJSONLink(filename)) {
+         var id_ = id++;
+         var timer = setTimeout(function() {
+            msgLog(id_, "Timeout, can't load the JSON.");
+         }, TIME_TO_WAIT);
+         $.getJSON(filename, function(data) {
+            processJSONContent(data);
+            clearTimeout(timer);
          });
-      });
+      }
+      else {
+         jsonContent = filename;
+         processJSONContent();
+      }
    }
 }
 
@@ -460,7 +484,7 @@ function gradeAnswer(key) {
    var id_ = id++;
    var r = false;
    var timer = setTimeout(function() {
-      msgLog(id_, "Timeout, task didn't answer.");
+      msgLog(id_, "Timeout, grader didn't answer.");
    }, TIME_TO_WAIT);
    grader.gradeTask(jsonContent[key].content, '', function(score, message, scoreToken) {
       r = jsonContent[key].expectedScore === score && jsonContent[key].expectedMessage === message;
@@ -472,4 +496,4 @@ function gradeAnswer(key) {
 }
 
 var anc_tab = "0";
-loadJSON("test.json");
+//loadJSON("test.json");
