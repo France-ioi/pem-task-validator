@@ -433,6 +433,9 @@ function processJSONContent(data) {
    if (typeof data !== "undefined") {
       jsonContent = data;
    }
+   else {
+      jsonContent = JSON.parse(jsonContent);
+   }
    $.each(jsonContent, function(key, val) {
       var content = "";
       var name = "";
@@ -462,7 +465,6 @@ function loadJSON(filename) {
       $('#error-emptyJSONUrl').css("visibility", "hidden");
       $(".tabs").empty();
       $(".tab_contents").empty();
-      alert("let's get started shall we");
       if (isJSONLink(filename)) {
          var id_ = id++;
          var timer = setTimeout(function() {
