@@ -436,12 +436,26 @@ function processJSONContent(data) {
    else {
       jsonContent = JSON.parse(jsonContent);
    }
+   //doesn't work, JavaScript is asynchronous! load every url before proceed
    $.each(jsonContent, function(key, val) {
       var content = "";
       var name = "";
       if (typeof val.type !== "undefined" && (val.type === "state" || val.type === "answer")) {
          $.each(val, function(key_, val_) {
-            if (key_ !== "name") {
+            if (key_ === "content" && isJSONLink(val_)) {
+               var timer = setTimeout(function() {
+                  msgLog(id, "Timeout, can't load JSON at: " + val_);
+               }, TIME_TO_WAIT);
+               $.getJSON(val_, function(data_) {
+                  alert(val_ + " becoming ");
+                  val_ = JSON.stringify(data_);
+                  alert("dat normally: " + JSON.stringify(data_))
+                  alert(" equals to: " + val_);
+                  content += "<li>" + key_ + ":" + JSON.stringify(data_) + "</li>";
+                  clearTimeout(timer);
+               });
+            }
+            else if (key_ !== "name") {
                content += "<li>" + key_ + ":" + val_ + "</li>";
             }
             else {
@@ -468,7 +482,7 @@ function loadJSON(filename) {
       if (isJSONLink(filename)) {
          var id_ = id++;
          var timer = setTimeout(function() {
-            msgLog(id_, "Timeout, can't load the JSON.");
+            msgLog(id_, "Timeout, can't load main JSON.");
          }, TIME_TO_WAIT);
          $.getJSON(filename, function(data) {
             processJSONContent(data);
@@ -482,7 +496,7 @@ function loadJSON(filename) {
    }
 }
 
-function gradeAnswer(key) {
+function testAnswer(key) {
    var id_ = id++;
    var r = false;
    var timer = setTimeout(function() {
@@ -498,4 +512,4 @@ function gradeAnswer(key) {
 }
 
 var anc_tab = "0";
-//loadJSON("test.json");
+loadJSON("test.json");

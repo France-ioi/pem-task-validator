@@ -79,7 +79,7 @@
             anc_tab = name;
             if(jsonContent[name].type === "answer") {
                reloadAnswer(jsonContent[name].content);
-               gradeAnswer(name);
+               testAnswer(name);
             }
             else {
                reloadState(jsonContent[name].content);
