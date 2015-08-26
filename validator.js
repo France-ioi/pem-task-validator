@@ -8,7 +8,7 @@ var urlLoaded = false;
 var id = 1;
 var jsonContent;
 
-Date.prototype.tokenFormat = function () {
+Date.prototype.tokenFormat = function() {
    var yyyy = this.getFullYear().toString();
    var mm = (this.getMonth() + 1).toString();
    var dd = this.getDate().toString();
@@ -64,11 +64,11 @@ function getGraderTokenParams() {
 function buildToken(grader, callback) {
    var id_ = id++;
    var tokenParams = grader ? getGraderTokenParams() : getTokenParams();
-   timer = setTimeout(function () {
+   timer = setTimeout(function() {
       msgLog(id_, "Timeout, task didn't answer.");
    }, TIME_TO_WAIT);
    msgLog(id_, 'building token...');
-   $.post('buildToken.php', {privateKey: privateKey, tokenParams: tokenParams}, function (token) {
+   $.post('buildToken.php', {privateKey: privateKey, tokenParams: tokenParams}, function(token) {
       console.log('token: ' + token);
       msgLog(id_, 'token received');
       callback(token);
@@ -79,7 +79,7 @@ function buildToken(grader, callback) {
 mainToken = '';
 
 function getToken() {
-   buildToken(false, function (token) {
+   buildToken(false, function(token) {
       mainToken = token;
    });
 }
@@ -129,11 +129,10 @@ function msgLog(id_, msg) {
 
 function clearLogs() {
    $('.messages').html('');
-   id = 1;
 }
 
 function initTask(callback) {
-   TaskProxyManager.getTaskProxy('task-view', function (resTask) {
+   TaskProxyManager.getTaskProxy('task-view', function(resTask) {
       task = resTask;
       grader = resTask;
       TaskProxyManager.setPlatform(task, platform);
@@ -145,12 +144,12 @@ function initTask(callback) {
 function loadTask() {
    var id_ = id++;
    msgLog(id_, 'initializing task...');
-   var timer = setTimeout(function () {
+   var timer = setTimeout(function() {
       msgLog(id_, "Timeout, task didn't answer.");
    }, TIME_TO_WAIT);
-   initTask(function () {
+   initTask(function() {
       msgLog(id_, 'calling task.load...');
-      task.load({'task': true, 'grader': true, 'metadata': true, 'solution': true, 'hints': true, 'forum': true, 'editor': true}, function () {
+      task.load({'task': true, 'grader': true, 'metadata': true, 'solution': true, 'hints': true, 'forum': true, 'editor': true}, function() {
          taskLoaded = true;
          msgLog(id_, 'task.load ok!');
          clearTimeout(timer);
@@ -163,10 +162,10 @@ function loadTask() {
 function unloadTask() {
    var id_ = id++;
    msgLog(id_, 'calling task.unload...');
-   var timer = setTimeout(function () {
+   var timer = setTimeout(function() {
       msgLog(id_, "Timeout, task didn't answer.");
    }, TIME_TO_WAIT);
-   task.unload(function () {
+   task.unload(function() {
       taskLoaded = false;
       msgLog(id_, 'task.unload ok!');
       clearTimeout(timer);
@@ -176,10 +175,10 @@ function unloadTask() {
 function getViews() {
    var id_ = id++;
    msgLog(id_, 'calling task.getViews()..');
-   var timer = setTimeout(function () {
+   var timer = setTimeout(function() {
       msgLog(id_, "Timeout, task didn't answer.");
    }, TIME_TO_WAIT);
-   task.getViews(function (views) {
+   task.getViews(function(views) {
       var strView = JSON.stringify(views);
       msgLog(id_, 'got views: ' + strView);
       $('#code-viewer').val(strView);
@@ -209,10 +208,10 @@ function getMetaData() {
       return;
    }
    msgLog(id_, 'calling task.getMetaData...');
-   var timer = setTimeout(function () {
+   var timer = setTimeout(function() {
       msgLog(id_, "Timeout, task didn't answer.");
    }, TIME_TO_WAIT);
-   task.getMetaData(function (metadata) {
+   task.getMetaData(function(metadata) {
       msgLog(id_, 'task.getMetaData ok!');
       msgLog(id_, 'received: ' + JSON.stringify(metadata));
       if (metadata.minWidth) {
@@ -255,10 +254,10 @@ function showViews() {
       $('#error-views').css("visibility", "hidden");
       var views = JSON.parse(strViews);
       msgLog(id_, 'calling task.showViews(' + strViews + ')..');
-      var timer = setTimeout(function () {
+      var timer = setTimeout(function() {
          msgLog(id_, "Timeout, task didn't answer.");
       }, TIME_TO_WAIT);
-      task.showViews(views, function () {
+      task.showViews(views, function() {
          msgLog(id_, 'views loaded');
          clearTimeout(timer);
       });
@@ -268,10 +267,10 @@ function showViews() {
 function getHeight() {
    var id_ = id++;
    msgLog(id_, 'calling task.getHeight()..');
-   var timer = setTimeout(function () {
+   var timer = setTimeout(function() {
       msgLog(id_, "Timeout, task didn't answer.");
    }, TIME_TO_WAIT);
-   task.getHeight(function (height) {
+   task.getHeight(function(height) {
       msgLog(id_, 'got height: ' + height);
       msgLog(id_, 'setting iframe height: ' + height);
       $('#task-view').height(height);
@@ -280,7 +279,7 @@ function getHeight() {
 }
 
 function reloadAnswer(answer) {
-   if(typeof answer === "undefined") {
+   if (typeof answer === "undefined") {
       answer = $('#answer').val();
    }
    var ok = true;
@@ -291,10 +290,10 @@ function reloadAnswer(answer) {
       var id_ = id++;
       $('#error-answer').css("visibility", "hidden");
       msgLog(id_, 'calling task.reloadAnswer(' + answer + ')..');
-      var timer = setTimeout(function () {
+      var timer = setTimeout(function() {
          msgLog(id_, "Timeout, task didn't answer.");
       }, TIME_TO_WAIT);
-      task.reloadAnswer(answer, function () {
+      task.reloadAnswer(answer, function() {
          msgLog(id_, 'answer loaded');
          clearTimeout(timer);
       });
@@ -307,10 +306,10 @@ function reloadAnswer(answer) {
 function getAnswer() {
    var id_ = id++;
    msgLog(id_, 'calling task.getAnswer()..');
-   var timer = setTimeout(function () {
+   var timer = setTimeout(function() {
       msgLog(id_, "Timeout, task didn't answer.");
    }, TIME_TO_WAIT);
-   task.getAnswer(function (answer) {
+   task.getAnswer(function(answer) {
       msgLog(id_, 'got answer: ' + answer);
       $('#code-viewer').val(answer);
       clearTimeout(timer);
@@ -318,7 +317,7 @@ function getAnswer() {
 }
 
 function reloadState(state) {
-   if(typeof state === "undefined") {
+   if (typeof state === "undefined") {
       state = $('#state').val();
    }
    if (state === "") {
@@ -328,10 +327,10 @@ function reloadState(state) {
       var id_ = id++;
       $('#error-emptyState').css("visibility", "hidden");
       msgLog(id_, 'calling task.reloadState(' + state + ')..');
-      var timer = setTimeout(function () {
+      var timer = setTimeout(function() {
          msgLog(id_, "Timeout, task didn't answer.");
       }, TIME_TO_WAIT);
-      task.reloadState(state, function () {
+      task.reloadState(state, function() {
          msgLog(id_, 'state loaded');
          clearTimeout(timer);
       });
@@ -341,10 +340,10 @@ function reloadState(state) {
 function getState() {
    var id_ = id++;
    msgLog(id_, 'calling task.getState()..');
-   var timer = setTimeout(function () {
+   var timer = setTimeout(function() {
       msgLog(id_, "Timeout, task didn't answer.");
    }, TIME_TO_WAIT);
-   task.getState(function (state) {
+   task.getState(function(state) {
       msgLog(id_, 'got state : ' + state);
       $('#code-viewer').val(state);
       clearTimeout(timer);
@@ -353,12 +352,12 @@ function getState() {
 
 function updateToken() {
    var id_ = id++;
-   buildToken(false, function (token) {
-      var timer = setTimeout(function () {
+   buildToken(false, function(token) {
+      var timer = setTimeout(function() {
          msgLog(id_, "Timeout, task didn't answer.");
       }, TIME_TO_WAIT);
       msgLog(id_, 'calling task.updateToken()..');
-      task.updateToken(token, function () {
+      task.updateToken(token, function() {
          msgLog(id_, 'token updated');
          clearTimeout(timer);
       });
@@ -374,22 +373,22 @@ function gradeTask() {
       var id_ = id++;
       $('#error-graderanswer').css("visibility", "hidden");
       if (!$('#main-token-fields').hasClass('hidden')) {
-         buildToken(true, function (token) {
+         buildToken(true, function(token) {
             msgLog(id_, 'calling grader.gradeTask(' + graderanswer + ')..');
-            var timer = setTimeout(function () {
+            var timer = setTimeout(function() {
                msgLog(id_, "Timeout, task didn't answer.");
             }, TIME_TO_WAIT);
-            grader.gradeTask(graderanswer, token, function (score, message, scoreToken) {
+            grader.gradeTask(graderanswer, token, function(score, message, scoreToken) {
                msgLog(id_, 'received from grader: score=' + score + ', message=' + message + ', scoreToken=' + scoreToken);
                clearTimeout(timer);
             });
          });
       } else {
          msgLog(id_, 'calling task.reloadAnswer(' + graderanswer + ')..');
-         var timer = setTimeout(function () {
+         var timer = setTimeout(function() {
             msgLog(id_, "Timeout, task didn't answer.");
          }, TIME_TO_WAIT);
-         grader.gradeTask(graderanswer, '', function (score, message, scoreToken) {
+         grader.gradeTask(graderanswer, '', function(score, message, scoreToken) {
             msgLog(id_, 'received from grader: score=' + score + ', message=' + message + ', scoreToken=' + scoreToken);
             clearTimeout(timer);
          });
@@ -402,26 +401,26 @@ function loadPlatform() {
    // task-proxy.js provides a Platform class
    platform = new Platform(task);
    // we implement a few methods:
-   platform.validate = function (mode) {
+   platform.validate = function(mode) {
       msgLog(id_, 'receiving platform.validate(' + mode + ')');
    };
-   platform.updateHeight = function (height) {
+   platform.updateHeight = function(height) {
       $('#task-view').height(height);
       msgLog(id_, 'receiving platform.updateHeight(' + height + '), setting height of iframe');
    };
-   platform.askHint = function () {
+   platform.askHint = function() {
       msgLog(id_, 'receiving platform.askHint()');
    };
-   platform.openUrl = function (id) {
+   platform.openUrl = function(id) {
       msgLog(id_, 'receiving platform.openUrl(' + id + ')');
    };
-   platform.showViews = function (views) {
+   platform.showViews = function(views) {
       views = JSON.stringify(views);
       msgLog(id_, 'receiving platform.showViews(' + views + ')');
    };
 }
 
-$(document).ready(function () {
+$(document).ready(function() {
    //alert("document ready");
    loadPlatform();
 });
@@ -435,13 +434,13 @@ function loadJSON(filename) {
    }
    else {
       $('#error-emptyJSONUrl').css("visibility", "hidden");
-      $.getJSON(filename, function (data) {
+      $.getJSON(filename, function(data) {
          jsonContent = data;
-         $.each(data, function (key, val) {
+         $.each(data, function(key, val) {
             var content = "";
             var name = "";
             if (typeof val.type !== "undefined" && (val.type === "state" || val.type === "answer")) {
-               $.each(val, function (key_, val_) {
+               $.each(val, function(key_, val_) {
                   if (key_ !== "name") {
                      content += "<li>" + key_ + ":" + val_ + "</li>";
                   }
@@ -455,6 +454,21 @@ function loadJSON(filename) {
          });
       });
    }
+}
+
+function gradeAnswer(key) {
+   var id_ = id++;
+   var r = false;
+   var timer = setTimeout(function() {
+      msgLog(id_, "Timeout, task didn't answer.");
+   }, TIME_TO_WAIT);
+   grader.gradeTask(jsonContent[key].content, '', function(score, message, scoreToken) {
+      r = jsonContent[key].expectedScore === score && jsonContent[key].expectedMessage === message;
+      msgLog(id_, 'received from grader: score=' + score + ', message=' + message + ', scoreToken=' + scoreToken);
+      msgLog(id_, 'score and message are ' + (r ? '' : 'not ') + 'corresponding to the expectation');
+      clearTimeout(timer);
+   });
+   return r;
 }
 
 var anc_tab = "0";
