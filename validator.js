@@ -215,6 +215,9 @@ function getMetaData() {
       msgLog(id_, 'task.getMetaData ok!');
       msgLog(id_, 'received: ' + JSON.stringify(metadata));
       if (metadata.minWidth) {
+         //little hack
+         if(metadata.minWidth === "auto")
+            metadata.minWidth = 800;
          $('#task-view').width(metadata.minWidth);
          msgLog(id_, 'setting iframe width to ' + metadata.minWidth);
       }
@@ -436,6 +439,7 @@ function processJSONContent(data) {
    else {
       jsonContent = JSON.parse(jsonContent);
    }
+   //appeler tous les content en cascade via des requêtes ajax, la dernière appelant la maj du html
    //doesn't work, JavaScript is asynchronous! load every url before proceed
    $.each(jsonContent, function(key, val) {
       var content = "";
@@ -447,11 +451,9 @@ function processJSONContent(data) {
                   msgLog(id, "Timeout, can't load JSON at: " + val_);
                }, TIME_TO_WAIT);
                $.getJSON(val_, function(data_) {
-                  alert(val_ + " becoming ");
-                  val_ = JSON.stringify(data_);
-                  alert("dat normally: " + JSON.stringify(data_))
-                  alert(" equals to: " + val_);
                   content += "<li>" + key_ + ":" + JSON.stringify(data_) + "</li>";
+                  alert($("#tab_content_" + key).val());
+                  $("#tab_content_" + key).val('<h1>' + name + '</h1>' + content);
                   clearTimeout(timer);
                });
             }
