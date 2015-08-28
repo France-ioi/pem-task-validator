@@ -216,7 +216,7 @@ function getMetaData() {
       msgLog(id_, 'received: ' + JSON.stringify(metadata));
       if (metadata.minWidth) {
          //little hack
-         if(metadata.minWidth === "auto")
+         if (metadata.minWidth === "auto")
             metadata.minWidth = 800;
          $('#task-view').width(metadata.minWidth);
          msgLog(id_, 'setting iframe width to ' + metadata.minWidth);
@@ -432,32 +432,35 @@ function isJSONLink(string) {
    return /.*\.json$/.test(string);
 }
 
-function processJSONContent(data) {
-   if (typeof data !== "undefined") {
-      jsonContent = data;
-   }
-   else {
-      jsonContent = JSON.parse(jsonContent);
-   }
-   //appeler tous les content en cascade via des requêtes ajax, la dernière appelant la maj du html
-   //doesn't work, JavaScript is asynchronous! load every url before proceed
+function isLink(string) {
+   return /^http/.test(string);
+}
+
+function getLinks() {
+   var links = [];
+   $.each(jsonContent, function(key, val) {
+      if (typeof val.type !== "undefined" && (val.type === "state" || val.type === "answer")) {
+         $.each(val, function(key_, val_) {
+            if (key_ === "content" && isLink(val_)) {
+               links.push(val_);
+            }
+         });
+      }
+   });
+   return links;
+}
+
+function replaceContent(linkContents) {
    $.each(jsonContent, function(key, val) {
       var content = "";
       var name = "";
       if (typeof val.type !== "undefined" && (val.type === "state" || val.type === "answer")) {
          $.each(val, function(key_, val_) {
-            if (key_ === "content" && isJSONLink(val_)) {
-               var timer = setTimeout(function() {
-                  msgLog(id, "Timeout, can't load JSON at: " + val_);
-               }, TIME_TO_WAIT);
-               $.getJSON(val_, function(data_) {
-                  content += "<li>" + key_ + ":" + JSON.stringify(data_) + "</li>";
-                  alert($("#tab_content_" + key).val());
-                  $("#tab_content_" + key).val('<h1>' + name + '</h1>' + content);
-                  clearTimeout(timer);
-               });
+            if (key_ === "content" && isLink(val_)) {
+               //alert(val_ + " : " + linkContents[val_]);
+               val_ = linkContents[val_];
             }
-            else if (key_ !== "name") {
+            if (key_ !== "name") {
                content += "<li>" + key_ + ":" + val_ + "</li>";
             }
             else {
@@ -468,6 +471,35 @@ function processJSONContent(data) {
          $(".tab_contents").append('<div class="tab_content" id="tab_content_' + key + '"><h1>' + name + '</h1>' + content + '</div>');
       }
    });
+}
+
+function loadAndReplaceContent(links) {
+   function load(i, linkContents) {
+      if (i === links.length) {
+         replaceContent(linkContents);
+         return;
+      }
+      $.get(links[i], function(data) {
+         //warning, it should be a string but may be an other object
+         linkContents[links[i]] = JSON.stringify(data);
+      }).fail(function() {
+         alert(":'(");
+         linkContents[links[i]] = "Fail to load: " + links[i];
+      }).always(function() {
+         load(i + 1, linkContents);
+      });
+   }
+   load(0, []);
+}
+
+function processJSONContent(data) {
+   if (typeof data !== "undefined") {
+      jsonContent = data;
+   }
+   else {
+      jsonContent = JSON.parse(jsonContent);
+   }
+   loadAndReplaceContent(getLinks());
 }
 
 function loadJSON(filename) {
