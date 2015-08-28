@@ -480,11 +480,16 @@ function loadAndReplaceContent(links) {
          return;
       }
       $.get(links[i], function(data) {
-         //warning, it should be a string but may be an other object
-         linkContents[links[i]] = JSON.stringify(data);
+         //warning, it should be a string but it also may be an other object
+         if (typeof data === 'string' || data instanceof String) {
+            linkContents[links[i]] = data;
+         }
+         else {
+            linkContents[links[i]] = JSON.stringify(data);
+         }
       }).fail(function() {
-         alert(":'(");
-         linkContents[links[i]] = "Fail to load: " + links[i];
+         linkContents[links[i]] = "fail to load: " + links[i];
+         console.log("fail to load: " + links[i]);
       }).always(function() {
          load(i + 1, linkContents);
       });
