@@ -129,6 +129,7 @@ function msgLog(id_, msg) {
 
 function clearLogs() {
    $('.messages').html('');
+   id = 1; //warning, previous timeout will appear later with a weird id
 }
 
 function initTask(callback) {
@@ -458,7 +459,7 @@ function replaceContent(linkContents) {
          $.each(val, function(key_, val_) {
             if (key_ === "content" && isLink(val_)) {
                //alert(val_ + " : " + linkContents[val_]);
-               val_ = linkContents[val_];
+               jsonContent[key].content = val_ = linkContents[val_];
             }
             if (key_ !== "name") {
                content += "<li>" + key_ + ":" + val_ + "</li>";
@@ -488,8 +489,8 @@ function loadAndReplaceContent(links) {
             linkContents[links[i]] = JSON.stringify(data);
          }
       }).fail(function() {
-         linkContents[links[i]] = "fail to load: " + links[i];
-         console.log("fail to load: " + links[i]);
+         linkContents[links[i]] = "fail to load " + links[i];
+         console.log("fail to load " + links[i]);
       }).always(function() {
          load(i + 1, linkContents);
       });
@@ -550,5 +551,13 @@ function testAnswer(key) {
    return r;
 }
 
-var anc_tab = "0";
-loadJSON("test.json");
+function gradeAll() {
+   $.each(jsonContent, function(key, val) {
+      if (typeof val.type !== "undefined" && val.type === "answer") {
+         testAnswer(key);
+      }
+   });
+}
+
+var anc_tab = "";
+//loadJSON("test.json");
