@@ -9,6 +9,7 @@ var id = 1;
 var jsonContent;
 var lastAnswer = "";
 var lastState = "";
+var curJson = {};
 
 Date.prototype.tokenFormat = function() {
    var yyyy = this.getFullYear().toString();
@@ -581,7 +582,7 @@ function writeInViewer(curJson) {
 }
 
 function addToJSON(type) {
-   var curJson = {};
+   curJson = {};
    curJson.name = "lol" + Math.floor(Math.random() * 1000);
    curJson.type = type;
    if (type === "answer") {
@@ -603,7 +604,6 @@ function addToJSON(type) {
       curJson.content = lastState;
    }
    dialog.dialog("open");
-   writeInViewer(curJson);
 }
 
 var anc_tab = "";

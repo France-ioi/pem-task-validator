@@ -15,7 +15,6 @@
          h1 { font-size: 1.2em; margin: .6em 0; }
          .ui-dialog .ui-state-error { padding: .3em; }
          .ui-dialog-buttonpane { font-size: 62.5%; }
-         .validateTips { border: 1px solid transparent; padding: 0.3em; }
       </style>
       <script>
          var dialog;
@@ -23,9 +22,8 @@
             var form,
                     // From http://www.whatwg.org/specs/web-apps/current-work/multipage/states-of-the-type-attribute.html#e-mail-state-%28type=email%29
                     name = $("#name"),
-                    email = $("#email"),
-                    password = $("#password"),
-                    allFields = $([]).add(name).add(email).add(password),
+                    comment = $("#comment"),
+                    allFields = $([]).add(name).add(comment),
                     tips = $(".validateTips");
 
             function updateTips(t) {
@@ -39,17 +37,19 @@
 
             function addJson() {
                allFields.removeClass("ui-state-error");
-               alert(42);
+               curJson.name = name.val();
+               curJson.comment = comment.val();
                dialog.dialog("close");
+               writeInViewer(curJson);
             }
 
             dialog = $("#dialog-form").dialog({
                autoOpen: false,
-               height: 300,
+               height: 250,
                width: 350,
                modal: true,
                buttons: {
-                  "Create an account": addJson,
+                  "Add to JSON-viewer": addJson,
                   Cancel: function() {
                      dialog.dialog("close");
                   }
@@ -245,18 +245,14 @@
       <textarea id="code-viewer" rows="4" cols="50"></textarea>
       <div><pre class="messages" style="clear:left;"></pre></div>
       <div id="popup">
-         <div id="dialog-form" style="font-size: 62.5%;" title="Create new user">
-            <p class="validateTips">All form fields are required.</p>
-
+         <div id="dialog-form" style="font-size: 62.5%;" title="Add an entry">
             <form>
                <fieldset>
                   <label for="name">Name</label>
-                  <input type="text" name="name" id="name" value="Jane Smith" class="text ui-widget-content ui-corner-all">
-                  <label for="email">Email</label>
-                  <input type="text" name="email" id="email" value="jane@smith.com" class="text ui-widget-content ui-corner-all">
-                  <label for="password">Password</label>
-                  <input type="password" name="password" id="password" value="xxxxxxx" class="text ui-widget-content ui-corner-all">
-
+                  <input type="text" name="name" id="name" value="name" class="text ui-widget-content ui-corner-all">
+                  <label for="comment">Comment</label>
+                  <input type="text" name="comment" id="comment" value="comment" class="text ui-widget-content ui-corner-all">
+                  
                   <!-- Allow form submission with keyboard without duplicating the dialog button -->
                   <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
                </fieldset>
