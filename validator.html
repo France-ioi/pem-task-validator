@@ -128,6 +128,7 @@
       </div>
       <br>
       <button onclick="loadJSON();">load JSON (text or local url):</button><input type="text" size="50" id="json" />
+      <textarea id="json-viewer" rows="4" cols="50">{}</textarea>
       <button onclick="gradeAll();">grade all answers</button>
       <span class="error" id="error-emptyJSONUrl">Warning, empty field.</span><br>
       answerToken (gradeTask): date, platform, idUser, idItem, sAnswer
@@ -162,10 +163,10 @@
       <button onclick="getHeight();">get height</button><br>
       <button onclick="reloadAnswer();">reload answer: </button><input size="50" id="answer" value='' />
       <span class="error" id="error-answer">Warning, empty field.</span><br>
-      <button onclick="getAnswer();">get answer</button><br>
+      <button onclick="getAnswer();">get answer</button><button onclick="addToJSON('answer');">add to JSON</button><br>
       <button onclick="reloadState();">reload state: </button><input size="50" id="state" value='' />
       <span class="error" id="error-state">Warning, empty field.</span><br>
-      <button onclick="getState();">get state</button>
+      <button onclick="getState();">get state</button><button onclick="addToJSON('state');">add to JSON</button>
       <button onclick="updateToken();">update token (takes values of the first form)</button><br>
       <div id="grade-token-fields" class="hidden">
          Grade token fields:<br>
@@ -175,7 +176,7 @@
          platform: <input type="text" size="50" id="grade-platform" value="1" /><br>
          sAnswer (must match graded answer): <input type="text" size="50" id="grade-sAnswer" value="1" /><br>
       </div>
-      <button onclick="gradeTask();">grade answer</button><input size="50" id="graderanswer" value='' />
+      <button onclick="gradeTask();">grade answer:</button><input size="50" id="graderanswer" value='' />
       <span class="error" id="error-graderanswer">Warning, empty field.</span><br>
       <button onclick="unloadTask();">unload task</button><br>
       <button onclick="clearLogs();">clear logs</button><br>

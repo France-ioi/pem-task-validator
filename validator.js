@@ -7,6 +7,8 @@ var taskLoaded = false;
 var urlLoaded = false;
 var id = 1;
 var jsonContent;
+var lastAnswer = "";
+var lastState = "";
 
 Date.prototype.tokenFormat = function() {
    var yyyy = this.getFullYear().toString();
@@ -316,6 +318,7 @@ function getAnswer() {
    task.getAnswer(function(answer) {
       msgLog(id_, 'got answer: ' + answer);
       $('#code-viewer').val(answer);
+      lastAnswer = answer;
       clearTimeout(timer);
    });
 }
@@ -350,6 +353,7 @@ function getState() {
    task.getState(function(state) {
       msgLog(id_, 'got state : ' + state);
       $('#code-viewer').val(state);
+      lastState = state;
       clearTimeout(timer);
    });
 }
@@ -458,7 +462,6 @@ function replaceContent(linkContents) {
       if (typeof val.type !== "undefined" && (val.type === "state" || val.type === "answer")) {
          $.each(val, function(key_, val_) {
             if (key_ === "content" && isLink(val_)) {
-               //alert(val_ + " : " + linkContents[val_]);
                jsonContent[key].content = val_ = linkContents[val_];
             }
             if (key_ !== "name") {
@@ -547,7 +550,7 @@ function testAnswer(key) {
       r = val.expectedScore === score && val.expectedMessage === message;
       msgLog(id_, 'received from grader: score=' + score + ', message=' + message + ', scoreToken=' + scoreToken);
       msgLog(id_, 'score and message are ' + (r ? '' : 'not ') + 'corresponding to the expectation');
-      $('#tab_' + key).html((r ? "✓" :"✗") + " " + val.name);
+      $('#tab_' + key).html((r ? "✓" : "✗") + " " + val.name);
       clearTimeout(timer);
    });
 }
@@ -558,6 +561,48 @@ function gradeAll() {
          testAnswer(key);
       }
    });
+}
+
+function writeInViewer(curJson) {
+   //curJson.content = curJson.content.rey(jsonWriplace(/"/g, '\\\"');
+   jsonWrited = JSON.parse($("#json-viewer").val());
+   if (typeof curJson.name !== "undefined") {
+      if (typeof jsonWrited[curJson.name] === "undefined") {
+         jsonWrited[curJson.name] = curJson;
+         $("#json-viewer").val(JSON.stringify(jsonWrited));
+      }
+      else {
+         alert("choose another name");
+      }
+   }
+   else {
+      alert("choose a name");
+   }
+}
+
+function addToJSON(type) {
+   var curJson = {};
+   curJson.name = "lol" + Math.floor(Math.random() * 1000);
+   curJson.type = type;
+   if (type === "answer") {
+      curJson.content = lastAnswer;
+      curJson.expectedScore = "undefined";
+      curJson.expectedMessage = "undefined";
+      var id_ = id++;
+      var timer = setTimeout(function() {
+         msgLog(id_, "Timeout, grader didn't answer.");
+      }, TIME_TO_WAIT);
+      grader.gradeTask(lastAnswer, '', function(score, message, scoreToken) {
+         curJson.expectedScore = score;
+         curJson.expectedMessage = message;
+         msgLog(id_, 'received from grader: score=' + score + ', message=' + message + ', scoreToken=' + scoreToken);
+         clearTimeout(timer);
+      });
+   }
+   else {
+      curJson.content = lastState;
+   }
+   writeInViewer(curJson);
 }
 
 var anc_tab = "";
