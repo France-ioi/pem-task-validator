@@ -602,6 +602,7 @@ function addToJSON(type) {
    else {
       curJson.content = lastState;
    }
+   dialog.dialog("open");
    writeInViewer(curJson);
 }
 
