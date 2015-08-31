@@ -538,17 +538,18 @@ function loadJSON(filename) {
 
 function testAnswer(key) {
    var id_ = id++;
-   var r = false;
+   var val = jsonContent[key];
    var timer = setTimeout(function() {
+      $('#tab_' + key).html("? " + val.name);
       msgLog(id_, "Timeout, grader didn't answer.");
    }, TIME_TO_WAIT);
-   grader.gradeTask(jsonContent[key].content, '', function(score, message, scoreToken) {
-      r = jsonContent[key].expectedScore === score && jsonContent[key].expectedMessage === message;
+   grader.gradeTask(val.content, '', function(score, message, scoreToken) {
+      r = val.expectedScore === score && val.expectedMessage === message;
       msgLog(id_, 'received from grader: score=' + score + ', message=' + message + ', scoreToken=' + scoreToken);
       msgLog(id_, 'score and message are ' + (r ? '' : 'not ') + 'corresponding to the expectation');
+      $('#tab_' + key).html((r ? "✓" :"✗") + " " + val.name);
       clearTimeout(timer);
    });
-   return r;
 }
 
 function gradeAll() {
@@ -560,4 +561,4 @@ function gradeAll() {
 }
 
 var anc_tab = "";
-//loadJSON("test.json");
+loadJSON("test.json");
