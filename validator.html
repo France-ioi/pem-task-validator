@@ -16,6 +16,7 @@
          div#users-contain table { margin: 1em 0; border-collapse: collapse; width: 100%; }
          div#users-contain table td, div#users-contain table th { border: 1px solid #eee; padding: .6em 10px; text-align: left; }
          .ui-dialog .ui-state-error { padding: .3em; }
+         .ui-dialog-buttonpane { font-size: 62.5%; }
          .validateTips { border: 1px solid transparent; padding: 0.3em; }
       </style>
       <script>
@@ -289,10 +290,10 @@
       <textarea id="code-viewer" rows="4" cols="50"></textarea>
       <div><pre class="messages" style="clear:left;"></pre></div>
       <div id="popup">
-         <div id="dialog-form" title="Create new user">
+         <div id="dialog-form" style="font-size: 62.5%;" title="Create new user">
             <p class="validateTips">All form fields are required.</p>
 
-            <form style="font-size: 62.5%;">
+            <form>
                <fieldset>
                   <label for="name">Name</label>
                   <input type="text" name="name" id="name" value="Jane Smith" class="text ui-widget-content ui-corner-all">
