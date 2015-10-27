@@ -3,10 +3,9 @@
    <head>
       <meta charset="utf-8">
       <title>PEM task validator</title>
-      <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+      <link rel="stylesheet" href="bower_components/jquery-ui/themes/base/jquery-ui.min.css">
       <script type="text/javascript" src="bower_components/jquery/dist/jquery.min.js"></script>
-      <!--script src="//code.jquery.com/jquery-1.10.2.js"></script-->
-      <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+      <script src="bower_components/jquery-ui/jquery-ui.min.js"></script>
       <style>
          div#popup { font-size: 62.5%; }
          #dialog-form label, #dialog-form input { display:block; }
@@ -216,7 +215,7 @@
       <button onclick="getToken()">get token (do it before loading url)</button>
       <button onclick="loadUrl()">load url in iframe (does not load task)</button><input type="text" size="50" id="taskUrl" value="" />
       <span class="error" id="error-emptyTaskUrl">Warning, empty field.</span>
-      <span class="error" id="error-emptyDomain">You have not selectionned a domain.</span><br>
+      <br><span class="error" id="error-emptyDomain">Please choose between same domain and cross domain.</span>
       <button onclick="loadTask();">load task (all views)</button><br>
       <button onclick="getViews();">get views</button><br>
       <button onclick="getMetaData();">get metadata</button><br>

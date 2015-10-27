@@ -192,8 +192,8 @@ function getViews() {
       if (!views.hasOwnProperty('solution')) {
          msgLog(id_, '<strong>error!</strong>missing "solution" in returned views');
       }
-      if (!views.hasOwnProperty('hint')) {
-         msgLog(id_, '<strong>error!</strong>missing "hint" in returned views');
+      if (!views.hasOwnProperty('hints')) {
+         msgLog(id_, '<strong>error!</strong>missing "hints" in returned views');
       }
       if (!views.hasOwnProperty('forum')) {
          msgLog(id_, '<strong>error!</strong>missing "forum" in returned views');
@@ -289,25 +289,16 @@ function reloadAnswer(answer) {
    if (typeof answer === "undefined") {
       answer = $('#answer').val();
    }
-   var ok = true;
-   if (answer === "") {
-      ok = confirm("Do you really want to reset?");
-   }
-   if (ok) {
-      var id_ = id++;
-      $('#error-answer').css("visibility", "hidden");
-      msgLog(id_, 'calling task.reloadAnswer(' + answer + ')..');
-      var timer = setTimeout(function() {
-         msgLog(id_, "Timeout, task didn't answer.");
-      }, TIME_TO_WAIT);
-      task.reloadAnswer(answer, function() {
-         msgLog(id_, 'answer loaded');
-         clearTimeout(timer);
-      });
-   }
-   else {
-      $('#error-answer').css("visibility", "visible");
-   }
+   var id_ = id++;
+   $('#error-answer').css("visibility", "hidden");
+   msgLog(id_, 'calling task.reloadAnswer(' + answer + ')..');
+   var timer = setTimeout(function() {
+      msgLog(id_, "Timeout, task didn't answer.");
+   }, TIME_TO_WAIT);
+   task.reloadAnswer(answer, function() {
+      msgLog(id_, 'answer loaded');
+      clearTimeout(timer);
+   });
 }
 
 function getAnswer() {
@@ -408,30 +399,36 @@ function gradeTask() {
 function loadPlatform() {
    var id_ = id++;
    // task-proxy.js provides a Platform class
-   platform = new Platform(task);
+   var platform = new Platform(task);
    // we implement a few methods:
-   platform.validate = function(mode) {
+   platform.validate = function(mode, success, error) {
       msgLog(id_, 'receiving platform.validate(' + mode + ')');
+      if (success) {success();}
    };
-   platform.updateHeight = function(height) {
+   platform.updateHeight = function(height, success, error) {
       $('#task-view').height(height);
       msgLog(id_, 'receiving platform.updateHeight(' + height + '), setting height of iframe');
+      if (success) {success();}
    };
-   platform.askHint = function() {
+   platform.askHint = function(success, error) {
       msgLog(id_, 'receiving platform.askHint()');
+      if (success) {success();}
    };
-   platform.openUrl = function(id) {
+   platform.openUrl = function(id, success, error) {
       msgLog(id_, 'receiving platform.openUrl(' + id + ')');
+      if (success) {success();}
    };
-   platform.showViews = function(views) {
+   platform.showViews = function(views, success, error) {
       views = JSON.stringify(views);
       msgLog(id_, 'receiving platform.showViews(' + views + ')');
+      if (success) {success();}
    };
+   return platform;
 }
 
 $(document).ready(function() {
    //alert("document ready");
-   loadPlatform();
+   window.platform = loadPlatform();
 });
 
 function isJSONLink(string) {
@@ -607,4 +604,10 @@ function addToJSON(type) {
 }
 
 var anc_tab = "";
-loadJSON("test.json");
+
+function startMultiValidation() {
+   loadTaskPr(function() {
+      var urls = $('#urls').val().split("\n");
+      autoCheckUrls(urls, 0);
+   });
+}
