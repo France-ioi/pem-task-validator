@@ -8,6 +8,9 @@
   "description": "validator for pem tasks",
   "license": "MIT",
   "dependencies": {
-    "pem-platform": "France-ioi/pem-platform"
+    "pem-platform": "France-ioi/pem-platform",
+    "jquery": "*",
+    "jquery-ui": "*",
+    "bootstrap": "*"
   }
 }
