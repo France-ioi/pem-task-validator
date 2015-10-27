@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="fr">
+   <head>
+      <meta charset="utf-8">
+      <title>PEM task validator</title>
+      <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
+      <script type="text/javascript" src="bower_components/jquery/dist/jquery.min.js"></script>
+      <style>
+         #task-view {
+            visibility:hidden;
+            width:10px;
+            height:10px;
+         }
+         .error {
+            display:inline;
+            color:#ff0000;
+         }
+      </style>
+      <script>
+         function textAreaAdjust(o) {
+             o.style.height = "1px";
+             o.style.height = (25+o.scrollHeight)+"px";
+         }
+         function loadAndStart() {
+            var url = "bower_components/pem-platform/task-xd-pr.js";
+            if ($('#samedomain').is(':checked')) {
+               samedomain = "bower_components/pem-platform/task-pr.js";
+            }
+            $.getScript("bower_components/pem-platform/task-pr.js", function() {
+               setTimeout(function() {
+                  $.getScript("validator-multi.js", function() {
+                     setTimeout(window.startMultiValidation, 0);
+                  });
+               }, 0);
+            });
+         }
+      </script>
+   </head>
+   <body>
+      <h1>PEM Task Validator</h1>
+      <div id="step1">
+         <p>Fill the following form with the URLs you would like to test (one URL per line):</p>
+         <textarea id="urls" cols="150" onkeyup="textAreaAdjust(this)" style="overflow:hidden">http://eroux.fr/bebras-tasks/2014/2014-FR-20-shell/index.html</textarea>
+      </div>
+      <div id="step2">
+         <input id="samedomain" type="checkbox" name="samedomain">Same domain?
+      </div>
+      <button onclick="loadAndStart()">Démarrer</button>
+      <p id="status"></p>
+      <div id="log"></div>
+      <iframe src="" id="task-view" style="visibility:hidden;"></iframe>
+   </body>
+</html>
