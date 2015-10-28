@@ -16,112 +16,149 @@ function addLog(level, url, text, error) {
    }
 }
 
+// we keep track of called callbacks to spot callbacks called twice
+var callbackCalled = {};
 
-function autoTestLoad(url, task, callback) {
-   updateStatus(url, 'calling task.load...');
-   task.load({task: true, grader: true, solution: true, metadata: true, hints: true, editor: true}, callback, function(errorcode, errormsg) {
-      addLog('error', url, 'error in task.load: '+errormsg);
-      callback();
-   });
+function checkCallback(url, funcName) {
+   var callbackName = url+funcName;
+   if (callbackCalled[callbackName]) {
+      addLog('error', url, 'received callback twice for task.'+funcName);
+      return false;
+   } else {
+      callbackCalled[callbackName] = true;
+      return true;
+   }
 }
 
-function autoTestShowViews(url, task, callback) {
-   updateStatus(url, 'calling task.showViews...');
-   task.showViews({task: true, solution: true, hints: true, editor: true}, callback, function(errorcode, errormsg) {
-      addLog('error', url, 'error in task.showViews: '+errormsg);
-      callback();
-   });
-}
-
-function autoTestGetAnswer(url, task, callback) {
-   updateStatus(url, 'calling task.getAnswer...');
-   task.getAnswer(function(answer) {
-      if (typeof answer !== 'string') {
-         addLog('error', url, 'task.getAnswer returned value of type "'+typeof answer+'"" instead of "string"');
+function genAutoTest(url, task, functionName, args, resultChecker) {
+   return function(callback) {
+      if (!task[functionName]) {
+         addLog('error', url, 'cannot call task.'+functionName);
+         callback();
+         return;
       }
-      callback();
-   }, function(errorcode, errormsg) {
-      addLog('error', url, 'error in task.getAnswer: '+errormsg);
-      callback();
-   });
-}
-
-function autoTestGetViews(url, task, callback) {
-   updateStatus(url, 'calling task.getViews...');
-   task.getViews(function(views) {
-      addLog('debug', url, 'receiving views:');
-      addLog('debug', null, views);
-      if (!views) {
-         addLog('error', url, 'task.getViews: no views returned');
-      }
-      var mandatory = ['task', 'solution', 'hints', 'editor', 'submissions', 'forum'];
-      var missing = [];
-      for (var i = 0; i < mandatory.length; i++) {
-         var field = mandatory[i];
-         if (typeof views[field] === 'undefined') {
-            missing.push(field);
+      if (!args) {args = [];}
+      var timeisout;
+      var timeout = window.setTimeout(function() {
+         timeisout = true;
+         addLog('error', url, 'did not receive callback from task.'+functionName+'after 500ms, aborting');
+         callback();
+      },500);
+      // adding success and error to args
+      args.push(function() {
+         if (!checkCallback(url, functionName)) {return;}
+         window.clearTimeout(timeout);
+         if (timeisout) {
+            addLog('error', url, 'finally received callback from task.'+functionName+'but too late');
+            return;
          }
-      }
-      if (missing.length) {
-         addLog('error', url, 'missing views: "'+missing.join('", "')+'"');
-      }
-      callback();
-   }, function(errorcode, errormsg) {
-      addLog('error', url, 'error in task.getViews: '+errormsg);
-      callback();
-   });
+         if (resultChecker) {
+            resultChecker(url,arguments[0],arguments[1],arguments[2]);
+         }
+         callback();
+      });
+      args.push(function(errorcode, errormsg) {
+         if (!checkCallback(url, functionName)) {return;}
+         window.clearTimeout(timeout);
+         addLog('error', url, 'error in task.getViews: '+errormsg);
+         callback();
+      });
+      updateStatus(url, 'calling task.'+functionName+'...');
+      task[functionName].apply(task,args);
+   };
 }
 
-function autoTestGetMetaData(url, task, callback) {
-   updateStatus(url, 'calling task.getMetaData...');
-   task.getMetaData(function(metadata) {
-      addLog('debug', url, 'receiving metadata:');
-      addLog('debug', null, metadata);
-      if (!metadata) {
-         addLog('error', url, 'task.getMetadata: no metadata returned');
+function checkAnswer(url, answer) {
+   if (typeof answer !== 'string') {
+      addLog('error', url, 'task.getAnswer returned value of type "'+typeof answer+'"" instead of "string"');
+   }
+}
+
+function checkViews(url,views) {
+   addLog('debug', url, 'receiving views:');
+   addLog('debug', null, views);
+   if (!views) {
+      addLog('error', url, 'task.getViews: no views returned');
+   }
+   var mandatory = ['task', 'solution', 'hints', 'editor', /*'submissions', */'forum'];
+   var missing = [];
+   for (var i = 0; i < mandatory.length; i++) {
+      var field = mandatory[i];
+      if (typeof views[field] === 'undefined') {
+         missing.push(field);
       }
-      var mandatory = ['id', 'language', 'version', 'title', 'authors', 'license'];
-      var missing = [];
-      for (var i = 0; i < mandatory.length; i++) {
-         var field = mandatory[i];
-         if (typeof metadata[field] === 'undefined') {
-            missing.push(field);
-         }
+   }
+   if (missing.length) {
+      addLog('error', url, 'missing views: "'+missing.join('", "')+'"');
+   }
+}
+
+function checkMetaData(url,metadata) {
+   addLog('debug', url, 'receiving metadata:');
+   addLog('debug', null, metadata);
+   if (!metadata) {
+      addLog('error', url, 'task.getMetadata: no metadata returned');
+   }
+   var mandatory = ['id', 'language', 'version', 'authors', 'license' /*, 'title' */];
+   var missing = [];
+   for (var i = 0; i < mandatory.length; i++) {
+      var field = mandatory[i];
+      if (typeof metadata[field] === 'undefined') {
+         missing.push(field);
       }
-      if (missing.length) {
-         addLog('error', url, 'missing fields in metadata: "'+missing.join('", "')+'"');
-      }
-      callback();
-   }, function(errorcode, errormsg) {
-      addLog('error', url, 'error in task.getMetaData: '+errormsg);
-      callback();
-   });
+   }
+   if (missing.length) {
+      addLog('error', url, 'missing fields in metadata: "'+missing.join('", "')+'"');
+   }
+}
+
+function checkGrader(url,score, message,scoreToken) {
+   addLog('debug', url, 'receiving score of '+score+' and message "'+message+'"');
+   if (typeof score !== 'number') {
+      addLog('error', url, 'task.gradeAnswer: score of type "'+typeof score+'" received instead of type "number"');
+   }
+   if (parseInt(score) !== score) {
+      addLog('error', url, 'task.gradeAnswer: score is float instead of integer: '+score);
+   }
+   if (score < 0) {
+      addLog('error', url, 'score below minScore: '+score);
+   }
+   if (score > 40) {
+      addLog('error', url, 'score above maxScore: '+score);
+   }
+   if (typeof message !== 'string') {
+      addLog('error', url, 'task.gradeAnswer: score of type "'+typeof message+'" received instead of type "string"');
+   }
 }
 
 function getTestArray(url, task, resources) {
    updateStatus(url, 'building tests...');
-   return [
-      {
-         'name': 'task.load',
-         'function': function(callback) {autoTestLoad(url, task, callback);}
-      },
-      {
-         'name': 'task.getMetaData',
-         'function': function(callback) {autoTestGetMetaData(url, task, callback);}
-      },
-      {
-         'name': 'task.getViews',
-         'function': function(callback) {autoTestGetViews(url, task, callback);}
-      },
-      {
-         'name': 'task.showViews',
-         'function': function(callback) {autoTestShowViews(url, task, callback);}
-      },
-      {
-         'name': 'task.getAnswer',
-         'function': function(callback) {autoTestGetAnswer(url, task, callback);}
-      },
-   ];
+   var res = [];
+   var names = ['load', 'getMetaData', 'getViews', 'reloadAnswer', 'getHeight', 'reloadState', 'showViews', 
+      'updateToken', 'getAnswer', 'gradeAnswer', 'getState', 'unload'];
+   var nameChecker = {
+      'getAnswer': checkAnswer,
+      'getViews': checkViews,
+      'getMetaData': checkMetaData,
+      'gradeAnswer': checkGrader,
+      'getState': checkAnswer
+   };
+   var nameArgs = {
+      'load': [{grader: true, metadata: true, task: true, solution: true, hints: true, forum: true}],
+      'showViews': [{task: true, solution: true, hints: true, forum: true}],
+      'reloadAnswer': [''],
+      'reloadState': ['""'],
+      'gradeAnswer': ['', ''],
+      'updateToken': ['']
+   };
+   for (var i = 0; i<names.length; i++) {
+      var funcName = names[i];
+      res.push({
+         'name': 'task.'+funcName,
+         'function': genAutoTest(url, task, funcName, nameArgs[funcName], nameChecker[funcName])
+      });
+   }
+   return res;
 }
 
 function validateTests(url, tests, testIndex, callback) {
@@ -166,8 +203,9 @@ function createPlatform(url, task) {
       if (success) {success();}
    };
    platform.getTaskParams = function(key, defaultValue, success, error) {
+      console.error('getTaskParams for '+url);
       addLog('debug', url, 'receiving platform.getTaskParams(' + JSON.stringify(key) + ', '+JSON.stringify(defaultValue)+')');
-      var res = {minScore: -3, maxScore: 10, randomSeed: 0, noScore: 0, readOnly: false, options: {}};
+      var res = {minScore: 0, maxScore: 40, randomSeed: 0, noScore: 0, readOnly: false, options: {}};
       if (key) {
          if (key !== 'options' && key in res) {
             res = res[key];
@@ -190,18 +228,28 @@ function validateUrl(url, callback) {
    updateStatus('start validation of '+url);
    $('#task-view').attr('src',url);
    updateStatus(url, 'getting proxy...');
+   var timeisout;
    var timeout = window.setTimeout(function(){
-      addLog('error', url, 'cannot obtain task proxy');
+      timeisout = true;
+      addLog('error', url, 'cannot obtain task proxy after 2s, aborting');
       callback();
    }, 2000);
    TaskProxyManager.getTaskProxy('task-view', function(task) {
+      if (!checkCallback(url, 'getTaskProxy')) {return;}
+      if (timeisout) {
+         addLog('error', url, 'finally obtained proxy, but too late');
+         return;
+      }
       window.clearTimeout(timeout);
       var platform = createPlatform(url, task);
       TaskProxyManager.setPlatform(task, platform);
       updateStatus(url, 'getting resources...');
       task.getResources(function(resources) {
-         validateTests(url, getTestArray(url, task, resources), 0, callback);
+         if (!checkCallback(url, 'getResources')) {return;}
+         var testArray = getTestArray(url, task, resources);
+         validateTests(url, testArray, 0, callback);
       }, function(errorcode, errormsg) {
+         if (!checkCallback(url, 'getResources')) {return;}
          addLog('warning', url, 'error trying to get resources: '+errormsg);
          validateTests(url, getTestArray(url, task), 0, callback);
       });
@@ -214,13 +262,19 @@ function validateUrls(urls, urlIndex) {
       return;
    }
    var url = urls[urlIndex];
-   validateUrl(url, function() {
+   url = url.trim();
+   if (!url) {
       validateUrls(urls, urlIndex+1);
-   });
+   } else {
+      validateUrl(url, function() {
+         validateUrls(urls, urlIndex+1);
+      });
+   }
 }
 
 function startMultiValidation() {
    var urls = $('#urls').val().split("\n");
+   callbackCalled = {};
    validateUrls(urls, 0);
 }
 
