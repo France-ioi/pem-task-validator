@@ -131,6 +131,40 @@ function checkGrader(url,score, message,scoreToken) {
    }
 }
 
+function getUserInput(url,testname,message,callback) {
+   $('#message').html(message);
+   $('#button-ok').on('click', function() {
+      addLog('log', url, 'manual test '+testname+' OK');
+      $('#user-input').hide();
+      $('#task-view').css('visibility', 'hidden');
+      callback();
+   });
+   $('#button-nok').on('click', function() {
+      addLog('error', url, 'manual test '+testname+' fail');
+      $('#user-input').hide();
+      $('#task-view').css('visibility', 'hidden');
+      callback();
+   });
+   $('#button-idontknow').on('click', function() {
+      addLog('error', url, 'manual test '+testname+' unknown');
+      $('#user-input').hide();
+      $('#task-view').css('visibility', 'hidden');
+      callback();
+   });
+   $('#user-input').show();
+   $('#task-view').css('visibility', 'visible');
+}
+
+function genManualTest(url, task, test) {
+   return function(callback) {
+      if (test.function == 'reloadAnswer') {
+         task.reloadAnswer(test.answer, function() {
+            getUserInput(url, 'State of the iframe when reloading answer '+test.answer, callback);
+         });
+      }
+   };
+}
+
 function getTestArray(url, task, resources) {
    updateStatus(url, 'building tests...');
    var res = [];
@@ -157,6 +191,15 @@ function getTestArray(url, task, resources) {
          'name': 'task.'+funcName,
          'function': genAutoTest(url, task, funcName, nameArgs[funcName], nameChecker[funcName])
       });
+   }
+   if (resources && resources.tests) {
+      for (i = 0; i<resources.tests.length; i++) {
+         var test = resources.tests[i];
+         res.push({
+            'name': 'manual test '+test.function,
+            'function': genManualTest(url, task, test)
+         });
+      }
    }
    return res;
 }
@@ -203,7 +246,6 @@ function createPlatform(url, task) {
       if (success) {success();}
    };
    platform.getTaskParams = function(key, defaultValue, success, error) {
-      console.error('getTaskParams for '+url);
       addLog('debug', url, 'receiving platform.getTaskParams(' + JSON.stringify(key) + ', '+JSON.stringify(defaultValue)+')');
       var res = {minScore: 0, maxScore: 40, randomSeed: 0, noScore: 0, readOnly: false, options: {}};
       if (key) {
@@ -231,9 +273,9 @@ function validateUrl(url, callback) {
    var timeisout;
    var timeout = window.setTimeout(function(){
       timeisout = true;
-      addLog('error', url, 'cannot obtain task proxy after 2s, aborting');
+      addLog('error', url, 'cannot obtain task proxy after 5s, aborting');
       callback();
-   }, 2000);
+   }, 5000);
    TaskProxyManager.getTaskProxy('task-view', function(task) {
       if (!checkCallback(url, 'getTaskProxy')) {return;}
       if (timeisout) {
