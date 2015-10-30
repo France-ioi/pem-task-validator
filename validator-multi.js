@@ -133,19 +133,19 @@ function checkGrader(url,score, message,scoreToken) {
 
 function getUserInput(url,testname,message,callback) {
    $('#message').html(message);
-   $('#button-ok').on('click', function() {
+   $('#button-ok').one('click', function() {
       addLog('log', url, 'manual test '+testname+' OK');
       $('#user-input').hide();
       $('#task-view').css('visibility', 'hidden');
       callback();
    });
-   $('#button-nok').on('click', function() {
+   $('#button-nok').one('click', function() {
       addLog('error', url, 'manual test '+testname+' fail');
       $('#user-input').hide();
       $('#task-view').css('visibility', 'hidden');
       callback();
    });
-   $('#button-idontknow').on('click', function() {
+   $('#button-idontknow').one('click', function() {
       addLog('error', url, 'manual test '+testname+' unknown');
       $('#user-input').hide();
       $('#task-view').css('visibility', 'hidden');
@@ -157,10 +157,20 @@ function getUserInput(url,testname,message,callback) {
 
 function genManualTest(url, task, test) {
    return function(callback) {
+      updateStatus(url, 'manual test '+test.function);
       if (test.function == 'reloadAnswer') {
          task.reloadAnswer(test.answer, function() {
-            getUserInput(url, 'State of the iframe when reloading answer '+test.answer, callback);
+            getUserInput(url, test.function+' '+test.answer, 'Please check the state of the iframe when reloading answer '+test.answer, callback);
          });
+      } else if (test.function == 'gradeAnswer') {
+         task.reloadAnswer(test.answer, function() {
+            task.gradeAnswer(test.answer, null, function(score, message) {
+               getUserInput(url, test.function+' '+test.answer, 'Grading answer '+test.answer+' gives score of '+score+' and message "'+message+'", is it correct?', callback);
+            });
+         });
+      } else {
+         addLog('unrecognized test function '+test.function);
+         callback();
       }
    };
 }
@@ -168,7 +178,7 @@ function genManualTest(url, task, test) {
 function getTestArray(url, task, resources) {
    updateStatus(url, 'building tests...');
    var res = [];
-   var names = ['load', 'getMetaData', 'getViews', 'reloadAnswer', 'getHeight', 'reloadState', 'showViews', 
+   var names = ['load', 'getMetaData', 'getViews', 'reloadAnswer', 'manual', 'getHeight', 'reloadState', 'showViews', 
       'updateToken', 'getAnswer', 'gradeAnswer', 'getState', 'unload'];
    var nameChecker = {
       'getAnswer': checkAnswer,
@@ -187,17 +197,21 @@ function getTestArray(url, task, resources) {
    };
    for (var i = 0; i<names.length; i++) {
       var funcName = names[i];
-      res.push({
-         'name': 'task.'+funcName,
-         'function': genAutoTest(url, task, funcName, nameArgs[funcName], nameChecker[funcName])
-      });
-   }
-   if (resources && resources.tests) {
-      for (i = 0; i<resources.tests.length; i++) {
-         var test = resources.tests[i];
+      // we add manual tests when task is loaded and showViews is called
+      if (funcName == 'manual') {
+         if (resources && resources.tests) {
+            for (var j = 0; j<resources.tests.length; j++) {
+               var test = resources.tests[j];
+               res.push({
+                  'name': 'manual test '+test.function,
+                  'function': genManualTest(url, task, test)
+               });
+            }
+         }
+      } else {
          res.push({
-            'name': 'manual test '+test.function,
-            'function': genManualTest(url, task, test)
+            'name': 'task.'+funcName,
+            'function': genAutoTest(url, task, funcName, nameArgs[funcName], nameChecker[funcName])
          });
       }
    }
