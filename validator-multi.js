@@ -322,7 +322,7 @@ function createPlatform(url, task) {
 }
 
 function formatJshintError(error) {
-   return 'line '+error.line+' character '+error.character+' in '+error.scope+': '+error.reason;
+   return 'line '+error.line+' character '+error.character+' : '+error.reason;
 }
 
 function testScriptJshint(url, scriptName, script) {
@@ -342,8 +342,6 @@ function testScriptJshint(url, scriptName, script) {
       for (var i = 0; i < JSHINT.errors.length; i++) {
          var error = JSHINT.errors[i];
          if (!error) {continue;}
-         //console.error(script);
-         //console.error(error);
          addLog('error', url, formatJshintError(error));
       }
    }
