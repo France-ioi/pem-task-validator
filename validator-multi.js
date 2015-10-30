@@ -114,24 +114,32 @@ function checkMetaData(url,metadata) {
 
 function checkGrader(url,score, message,scoreToken) {
    addLog('debug', url, 'receiving score of '+score+' and message "'+message+'"');
+   var res = true;
    if (typeof score !== 'number') {
       addLog('error', url, 'task.gradeAnswer: score of type "'+typeof score+'" received instead of type "number"');
+      res = false;
    }
    if (parseInt(score) !== score) {
       addLog('error', url, 'task.gradeAnswer: score is float instead of integer: '+score);
+      res = false;
    }
    if (score < 0) {
       addLog('error', url, 'score below minScore: '+score);
+      res = false;
    }
-   if (score > 40) {
+   if (score > 100) {
       addLog('error', url, 'score above maxScore: '+score);
+      res = false;
    }
    if (typeof message !== 'string') {
       addLog('error', url, 'task.gradeAnswer: score of type "'+typeof message+'" received instead of type "string"');
+      res = false;
    }
+   return res;
 }
 
 function getUserInput(url,testname,message,callback) {
+   console.error('debug123');
    $('#message').html(message);
    $('#button-ok').one('click', function() {
       addLog('log', url, 'manual test '+testname+' OK');
@@ -157,19 +165,35 @@ function getUserInput(url,testname,message,callback) {
 
 function genManualTest(url, task, test) {
    return function(callback) {
-      updateStatus(url, 'manual test '+test.function);
-      if (test.function == 'reloadAnswer') {
+      updateStatus(url, 'manual test for answer'+test.answer);
+      if (test.answer) {
          task.reloadAnswer(test.answer, function() {
-            getUserInput(url, test.function+' '+test.answer, 'Please check the state of the iframe when reloading answer '+test.answer, callback);
-         });
-      } else if (test.function == 'gradeAnswer') {
-         task.reloadAnswer(test.answer, function() {
-            task.gradeAnswer(test.answer, null, function(score, message) {
-               getUserInput(url, test.function+' '+test.answer, 'Grading answer '+test.answer+' gives score of '+score+' and message "'+message+'", is it correct?', callback);
+            getUserInput(url, test.answer, 'Please check the state of the iframe when reloading answer '+test.answer, function() {
+               if (test.scoreOutOf100) {
+                  task.gradeAnswer(test.answer, null, function(score, message, scoreToken) {
+                     if (checkGrader(url, score, message, scoreToken)) {
+                        var res = true;
+                        if (message != test.message) {
+                           res = false;
+                           addLog('error', url, 'grading answer '+test.answer+' gives message "'+message+'" instead of "'+test.message+'"');
+                        }
+                        if (score != test.scoreOutOf100) {
+                           res = false;
+                           addLog('error', url, 'grading answer '+test.answer+' gives score '+score+'/100 instead of "'+test.scoreOutOf100+'/100');
+                        }
+                        if (res) {
+                           addLog('log', url, 'task test grading answer '+test.answer+' OK');  
+                        }
+                     }
+                     callback();
+                  });
+               } else {
+                  callback();
+               }
             });
          });
       } else {
-         addLog('unrecognized test function '+test.function);
+         addLog('error', url, 'missing answer field in task test');
          callback();
       }
    };
@@ -261,7 +285,7 @@ function createPlatform(url, task) {
    };
    platform.getTaskParams = function(key, defaultValue, success, error) {
       addLog('debug', url, 'receiving platform.getTaskParams(' + JSON.stringify(key) + ', '+JSON.stringify(defaultValue)+')');
-      var res = {minScore: 0, maxScore: 40, randomSeed: 0, noScore: 0, readOnly: false, options: {}};
+      var res = {minScore: 0, maxScore: 100, randomSeed: 0, noScore: 0, readOnly: false, options: {}};
       if (key) {
          if (key !== 'options' && key in res) {
             res = res[key];
