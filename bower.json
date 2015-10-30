@@ -11,6 +11,7 @@
     "pem-platform": "France-ioi/pem-platform",
     "jquery": "*",
     "jquery-ui": "*",
-    "bootstrap": "*"
+    "bootstrap": "*",
+    "jshint": "*"
   }
 }

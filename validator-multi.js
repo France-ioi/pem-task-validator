@@ -139,7 +139,6 @@ function checkGrader(url,score, message,scoreToken) {
 }
 
 function getUserInput(url,testname,message,callback) {
-   console.error('debug123');
    $('#message').html(message);
    $('#button-ok').one('click', function() {
       addLog('log', url, 'manual test '+testname+' OK');
@@ -304,6 +303,82 @@ function createPlatform(url, task) {
    return platform;
 }
 
+function formatJshintError(error) {
+   return 'line '+error.line+' character '+error.character+' in '+error.scope+': '+error.reason;
+}
+
+function testScriptJshint(url, scriptName, script) {
+   JSHINT(script, {
+      "devel":true,
+      "browser": true,
+      "predef":[ "grader", "task", "platform", "stdAnsTypes", "displayHelper", "Platform", "Task", "Raphael", "DragAndDropSystem"],
+      "trailing": true,
+      "futurehostile": true,
+      "undef":true,
+      "unused":true,
+      "eqnull": true,
+      "jquery": true
+   });
+   if (JSHINT.errors.length) {
+      addLog('error', url, 'jshint output the following messages:');
+      for (var i = 0; i < JSHINT.errors.length; i++) {
+         var error = JSHINT.errors[i];
+         if (!error) {continue;}
+         //console.error(script);
+         //console.error(error);
+         addLog('error', url, formatJshintError(error));
+      }
+   }
+}
+
+function getAbsoluteUrl(baseUrl, resourceUrl) {
+   var isAbsolute = new RegExp('^(?:[a-z]+:)?//', 'i');
+   if (isAbsolute.test(resourceUrl)) {
+      return resourceUrl;
+   }
+   baseUrl = baseUrl.substr(0, baseUrl.lastIndexOf("/") + 1);
+   return baseUrl+resourceUrl;
+}
+
+var scriptUrlsTested = {};
+function testResourceJshint(url, resource, callback) {
+   if (resource.content) {
+      testScriptJshint(url, 'inline', resource.content);
+      callback();
+   } else {
+      var resourceUrl = getAbsoluteUrl(url, resource.url);
+      if (scriptUrlsTested[resourceUrl]) {
+         callback();
+      } else {
+         $.get(resourceUrl, function(data, status) {
+            testScriptJshint(resourceUrl, resource.id, data);
+            callback();
+         }, 'text');
+      }
+   }
+}
+
+var resourceTypes = ['task', 'solution', 'grader', 'display_modules', 'display', 'sat_modules', 'sat'];
+function testUrlJshint(url, resources, resourceTypeIndex, resourceIndex, callback) {
+   if (!resources[resourceTypes[resourceTypeIndex]] || resourceIndex >= resources[resourceTypes[resourceTypeIndex]].length) {
+      if (resourceTypeIndex >= resourceTypes.length) {
+         callback();
+      } else {
+         testUrlJshint(url, resources, resourceTypeIndex+1, 0, callback);
+      }
+      return;
+   }
+   var resource = resources[resourceTypes[resourceTypeIndex]][resourceIndex];
+   if (resource.type !== 'javascript') {
+      testUrlJshint(url, resources, resourceTypeIndex, resourceIndex + 1, callback);
+   } else {
+      console.error(resource);
+      testResourceJshint(url, resource, function() {
+         testUrlJshint(url, resources, resourceTypeIndex, resourceIndex + 1, callback);
+      });
+   }
+}
+
 function validateUrl(url, callback) {
    updateStatus('start validation of '+url);
    $('#task-view').attr('src',url);
@@ -326,8 +401,10 @@ function validateUrl(url, callback) {
       updateStatus(url, 'getting resources...');
       task.getResources(function(resources) {
          if (!checkCallback(url, 'getResources')) {return;}
-         var testArray = getTestArray(url, task, resources);
-         validateTests(url, testArray, 0, callback);
+         testUrlJshint(url, resources, 0, 0, function(){
+            var testArray = getTestArray(url, task, resources);
+            validateTests(url, testArray, 0, callback);
+         });
       }, function(errorcode, errormsg) {
          if (!checkCallback(url, 'getResources')) {return;}
          addLog('warning', url, 'error trying to get resources: '+errormsg);
