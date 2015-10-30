@@ -6,6 +6,7 @@ function updateStatus(url, text) {
    $('#status').html(url+': '+text);
 }
 
+var log = '';
 function addLog(level, url, text, error) {
    console[level](url ? url+': '+text : text);
    if (error) {
@@ -13,7 +14,12 @@ function addLog(level, url, text, error) {
    }
    if (level != 'debug') {
       $('#log').append('<p class="'+level+'">('+url+') '+level+': '+text+'</p>');
+      log = log+'\n'+'('+url+') '+level+': '+text;
    }
+}
+
+function getLog() {
+   return log;
 }
 
 // we keep track of called callbacks to spot callbacks called twice
@@ -52,8 +58,10 @@ function genAutoTest(url, task, functionName, args, resultChecker) {
             addLog('error', url, 'finally received callback from task.'+functionName+'but too late');
             return;
          }
-         if (resultChecker) {
-            resultChecker(url,arguments[0],arguments[1],arguments[2]);
+         if (resultChecker && resultChecker(url,arguments[0],arguments[1],arguments[2])) {
+               addLog('log', url, 'automatic test of task.'+functionName+' OK');
+         } else if (!resultChecker) {
+            addLog('log', url, 'automatic test of task.'+functionName+' OK');
          }
          callback();
       });
@@ -71,14 +79,18 @@ function genAutoTest(url, task, functionName, args, resultChecker) {
 function checkAnswer(url, answer) {
    if (typeof answer !== 'string') {
       addLog('error', url, 'task.getAnswer returned value of type "'+typeof answer+'"" instead of "string"');
+      return false;
    }
+   return true;
 }
 
 function checkViews(url,views) {
    addLog('debug', url, 'receiving views:');
    addLog('debug', null, views);
+   var res = true;
    if (!views) {
       addLog('error', url, 'task.getViews: no views returned');
+      res = false;
    }
    var mandatory = ['task', 'solution', 'hints', 'editor', /*'submissions', */'forum'];
    var missing = [];
@@ -90,14 +102,18 @@ function checkViews(url,views) {
    }
    if (missing.length) {
       addLog('error', url, 'missing views: "'+missing.join('", "')+'"');
+      res = false;
    }
+   return res;
 }
 
 function checkMetaData(url,metadata) {
    addLog('debug', url, 'receiving metadata:');
    addLog('debug', null, metadata);
+   var res = false;
    if (!metadata) {
       addLog('error', url, 'task.getMetadata: no metadata returned');
+      res = false;
    }
    var mandatory = ['id', 'language', 'version', 'authors', 'license' /*, 'title' */];
    var missing = [];
@@ -109,7 +125,9 @@ function checkMetaData(url,metadata) {
    }
    if (missing.length) {
       addLog('error', url, 'missing fields in metadata: "'+missing.join('", "')+'"');
+      res = false;
    }
+   return res;
 }
 
 function checkGrader(url,score, message,scoreToken) {
@@ -379,6 +397,7 @@ function testUrlJshint(url, resources, resourceTypeIndex, resourceIndex, callbac
    }
 }
 
+var useJshint = true;
 function validateUrl(url, callback) {
    updateStatus('start validation of '+url);
    $('#task-view').attr('src',url);
@@ -401,10 +420,15 @@ function validateUrl(url, callback) {
       updateStatus(url, 'getting resources...');
       task.getResources(function(resources) {
          if (!checkCallback(url, 'getResources')) {return;}
-         testUrlJshint(url, resources, 0, 0, function(){
+         if (useJshint) {
+            testUrlJshint(url, resources, 0, 0, function(){
+               var testArray = getTestArray(url, task, resources);
+               validateTests(url, testArray, 0, callback);
+            });
+         } else {
             var testArray = getTestArray(url, task, resources);
             validateTests(url, testArray, 0, callback);
-         });
+         }
       }, function(errorcode, errormsg) {
          if (!checkCallback(url, 'getResources')) {return;}
          addLog('warning', url, 'error trying to get resources: '+errormsg);
@@ -416,6 +440,8 @@ function validateUrl(url, callback) {
 function validateUrls(urls, urlIndex) {
    if (urlIndex >= urls.length) {
       updateStatus('','automatic validation finished!');
+      $('#task-view').css('display', 'none');
+      $('#copyButton').css('display', 'block');
       return;
    }
    var url = urls[urlIndex];
@@ -430,11 +456,15 @@ function validateUrls(urls, urlIndex) {
 }
 
 function startMultiValidation() {
+   log = '';
+   useJshint = $('#jshint').is(':checked');
+   $('#task-view').css('display', 'block');
    var urls = $('#urls').val().split("\n");
    callbackCalled = {};
    validateUrls(urls, 0);
 }
 
 window.startMultiValidation = startMultiValidation;
+window.getLog = getLog;
 
 }());

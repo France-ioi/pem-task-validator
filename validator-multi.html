@@ -38,18 +38,39 @@
                }, 0);
             });
          }
+         function selectText(containerid) {
+            var node = document.getElementById( containerid );
+            if ( document.selection ) {
+               var range = document.body.createTextRange();
+               range.moveToElementText( node  );
+               range.select();
+            } else if ( window.getSelection ) {
+               var range = document.createRange();
+               range.selectNodeContents( node );
+               window.getSelection().removeAllRanges();
+               window.getSelection().addRange( range );
+            }
+         }
       </script>
+      <style>
+         body {
+            margin-left: auto;
+            margin-right:auto;
+            max-width: 900px;
+         }
+      </style>
    </head>
    <body>
       <h1>PEM Task Validator</h1>
       <div id="step1">
          <p>Fill the following form with the URLs you would like to test (one URL per line):</p>
-         <textarea id="urls" cols="150" onkeyup="textAreaAdjust(this)" style="overflow:hidden">
+         <textarea id="urls" cols="100" onkeyup="textAreaAdjust(this)" style="overflow:hidden">
 http://eroux.fr/bebras-tasks/2014/2014-FR-05-laser/index.html
          </textarea>
       </div>
       <div id="step2">
-         <input id="samedomain" type="checkbox" name="samedomain">Cross domain?
+         <input id="jshint" type="checkbox" name="jshint" checked="checked">Run jshint
+         <input id="samedomain" type="checkbox" name="samedomain">Cross domain
       </div>
       <button onclick="loadAndStart()">Démarrer</button>
       <p id="status"></p>
@@ -60,6 +81,7 @@ http://eroux.fr/bebras-tasks/2014/2014-FR-05-laser/index.html
          <button id="button-idontknow">I don't know</button>
       </div>
       <iframe src="" id="task-view" style="visibility:hidden;"></iframe>
+      <button id="copyButton" style="display:none;" onclick="selectText('log');">Select report for copy</button>
       <div id="log"></div>
    </body>
 </html>
