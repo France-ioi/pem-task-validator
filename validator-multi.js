@@ -488,9 +488,14 @@ function validateUrls(urls, urlIndex) {
    if (!url) {
       validateUrls(urls, urlIndex+1);
    } else {
-      validateUrl(url, function() {
+      if (urls.indexOf(url) != urlIndex) {
+         addLog('error', url, 'url has been validated before, skipping');
          validateUrls(urls, urlIndex+1);
-      });
+      } else {
+         validateUrl(url, function() {
+            validateUrls(urls, urlIndex+1);
+         });
+      }
    }
 }
 
