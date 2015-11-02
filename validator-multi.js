@@ -283,9 +283,19 @@ function createPlatform(url, task) {
       if (success) {success();}
    };
    platform.updateHeight = function(height, success, error) {
+      if (parseInt(height) !== height) {
+         addLog('error', url, 'receiving platform.updateHeight with non-integer argument');
+         if (success) {success();}
+         return;
+      }
+      if (height < 1) {
+         addLog('error', url, 'receiving platform.updateHeight with argument < 1');
+         if (success) {success();}
+         return;
+      }
       $('#task-view').height(height);
       addLog('debug', url, 'receiving platform.updateHeight(' + height + '), setting height of iframe');
-      if (success) {success();}
+      
    };
    platform.askHint = function(success, error) {
       addLog('debug', url, 'receiving platform.askHint()');
