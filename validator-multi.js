@@ -234,7 +234,7 @@ function genManualTest(url, task, test, nameArgs) {
 function getTestArray(url, task, resources) {
    updateStatus(url, 'building tests...');
    var res = [];
-   var names = ['load', 'getMetaData', 'getViews', 'reloadAnswer', 'manual', 'getHeight', 'reloadState', 'showViews', 
+   var names = ['load', 'getMetaData', 'getViews', 'showViews', 'manual', 'reloadAnswer', 'getHeight', 'reloadState', 
       'updateToken', 'getAnswer', 'gradeAnswer', 'getState', 'unload'];
    var nameChecker = {
       'getAnswer': checkAnswer,
