@@ -180,35 +180,50 @@ function getUserInput(url,testname,message,callback) {
    $('#task-view').css('visibility', 'visible');
 }
 
-function genManualTest(url, task, test) {
-   return function(callback) {
-      updateStatus(url, 'manual test for answer'+test.answer);
-      if (test.answer) {
-         task.reloadAnswer(test.answer, function() {
-            getUserInput(url, test.answer, 'Please check the state of the iframe when reloading answer '+test.answer, function() {
-               if (test.scoreOutOf100) {
-                  task.gradeAnswer(test.answer, null, function(score, message, scoreToken) {
-                     if (checkGrader(url, score, message, scoreToken)) {
-                        var res = true;
-                        if (message != test.message) {
-                           res = false;
-                           addLog('error', url, 'grading answer '+test.answer+' gives message "'+message+'" instead of "'+test.message+'"');
-                        }
-                        if (score != test.scoreOutOf100) {
-                           res = false;
-                           addLog('error', url, 'grading answer '+test.answer+' gives score '+score+'/100 instead of "'+test.scoreOutOf100+'/100');
-                        }
-                        if (res) {
-                           addLog('log', url, 'task test grading answer '+test.answer+' OK');  
-                        }
-                     }
-                     callback();
-                  });
-               } else {
-                  callback();
+function checkManualTestAnswer(url, task, test, callback) {
+   task.reloadAnswer(test.answer, function() {
+   getUserInput(url, test.answer, 'Please check the state of the iframe when reloading answer '+test.answer, function() {
+      if (test.scoreOutOf100) {
+         task.gradeAnswer(test.answer, null, function(score, message, scoreToken) {
+            if (checkGrader(url, score, message, scoreToken)) {
+               var res = true;
+               if (message != test.message) {
+                  res = false;
+                  addLog('error', url, 'grading answer '+test.answer+' gives message "'+message+'" instead of "'+test.message+'"');
                }
-            });
+               if (score != test.scoreOutOf100) {
+                  res = false;
+                  addLog('error', url, 'grading answer '+test.answer+' gives score '+score+'/100 instead of "'+test.scoreOutOf100+'/100');
+               }
+               if (res) {
+                  addLog('log', url, 'task test grading answer '+test.answer+' OK');  
+               }
+            }
+            callback();
          });
+      } else {
+         callback();
+      }
+   });
+});
+}
+
+function genManualTest(url, task, test, nameArgs) {
+   return function(callback) {
+      if (test.answer) {
+         if (test.reload) {
+            updateStatus(url, 'manual test for answer'+test.answer+' (after unload/reload)');
+            task.unload(function() {
+               task.load(nameArgs.load[0], function() {
+                  task.showViews(nameArgs.showViews[0], function() {
+                     checkManualTestAnswer(url, task, test, callback);         
+                  });
+               });
+            });
+         } else {
+            updateStatus(url, 'manual test for answer'+test.answer);
+            checkManualTestAnswer(url, task, test, callback);
+         }
       } else {
          addLog('error', url, 'missing answer field in task test');
          callback();
@@ -245,7 +260,7 @@ function getTestArray(url, task, resources) {
                var test = resources.tests[j];
                res.push({
                   'name': 'manual test '+test.function,
-                  'function': genManualTest(url, task, test)
+                  'function': genManualTest(url, task, test, nameArgs)
                });
             }
          }
