@@ -289,7 +289,22 @@ function validateTests(url, tests, testIndex, callback) {
    }
 }
 
+function getOptions(url) {
+   var regex = new RegExp("[\\?&]options=([^&#]*)"),
+      options = regex.exec(url);
+   options = (options === null) ? "" : decodeURIComponent(options[1].replace(/\+/g, " "));
+   var optionsRes;
+   try {
+      optionsRes = JSON.parse(options);
+   } catch (e) {
+      addLog('error', url, 'cannot understand options passed to url');
+      optionsRes = {};
+   }
+   return optionsRes;
+}
+
 function createPlatform(url, task) {
+   var options = getOptions(url);
    // task-proxy.js provides a Platform class
    var platform = new Platform(task);
    // we implement a few methods:
@@ -327,7 +342,8 @@ function createPlatform(url, task) {
    };
    platform.getTaskParams = function(key, defaultValue, success, error) {
       addLog('debug', url, 'receiving platform.getTaskParams(' + JSON.stringify(key) + ', '+JSON.stringify(defaultValue)+')');
-      var res = {minScore: 0, maxScore: 100, randomSeed: 0, noScore: 0, readOnly: false, options: {}};
+      var res = {minScore: 0, maxScore: 100, randomSeed: 0, noScore: 0, readOnly: false, options: options};
+      console.error(res);
       if (key) {
          if (key !== 'options' && key in res) {
             res = res[key];
