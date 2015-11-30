@@ -47,7 +47,7 @@ function genAutoTest(url, task, functionName, args, resultChecker) {
       var timeisout;
       var timeout = window.setTimeout(function() {
          timeisout = true;
-         addLog('error', url, 'did not receive callback from task.'+functionName+'after 500ms, aborting');
+         addLog('error', url, 'did not receive callback from task.'+functionName+' after 500ms, aborting');
          callback();
       },500);
       // adding success and error to args
@@ -55,7 +55,7 @@ function genAutoTest(url, task, functionName, args, resultChecker) {
          if (!checkCallback(url, functionName)) {return;}
          window.clearTimeout(timeout);
          if (timeisout) {
-            addLog('error', url, 'finally received callback from task.'+functionName+'but too late');
+            addLog('error', url, 'finally received callback from task.'+functionName+' but too late');
             return;
          }
          if (resultChecker && resultChecker(url,arguments[0],arguments[1],arguments[2])) {
@@ -150,7 +150,7 @@ function checkGrader(url,score, message,scoreToken) {
       res = false;
    }
    if (typeof message !== 'string') {
-      addLog('error', url, 'task.gradeAnswer: score of type "'+typeof message+'" received instead of type "string"');
+      addLog('error', url, 'task.gradeAnswer: message of type "'+typeof message+'" received instead of type "string"');
       res = false;
    }
    return res;
@@ -187,7 +187,7 @@ function checkManualTestAnswer(url, task, test, callback) {
          task.gradeAnswer(test.answer, null, function(score, message, scoreToken) {
             if (checkGrader(url, score, message, scoreToken)) {
                var res = true;
-               if (message != test.message) {
+               if (test.message && message != test.message) {
                   res = false;
                   addLog('error', url, 'grading answer '+test.answer+' gives message "'+message+'" instead of "'+test.message+'"');
                }
@@ -293,14 +293,16 @@ function getOptions(url) {
    var regex = new RegExp("[\\?&]options=([^&#]*)"),
       options = regex.exec(url);
    options = (options === null) ? "" : decodeURIComponent(options[1].replace(/\+/g, " "));
-   var optionsRes;
+   if (!options) {
+      return {};
+   }
    try {
-      optionsRes = JSON.parse(options);
+      options = JSON.parse(options);
    } catch (e) {
       addLog('error', url, 'cannot understand options passed to url');
-      optionsRes = {};
+      options = {};
    }
-   return optionsRes;
+   return options;
 }
 
 function createPlatform(url, task) {
@@ -343,7 +345,6 @@ function createPlatform(url, task) {
    platform.getTaskParams = function(key, defaultValue, success, error) {
       addLog('debug', url, 'receiving platform.getTaskParams(' + JSON.stringify(key) + ', '+JSON.stringify(defaultValue)+')');
       var res = {minScore: 0, maxScore: 100, randomSeed: 0, noScore: 0, readOnly: false, options: options};
-      console.error(res);
       if (key) {
          if (key !== 'options' && key in res) {
             res = res[key];
@@ -373,8 +374,6 @@ function testScriptJshint(url, scriptName, script) {
       "predef":[ "grader", "task", "platform", "stdAnsTypes", "displayHelper", "Platform", "Task", "Raphael", "DragAndDropSystem"],
       "trailing": true,
       "futurehostile": true,
-      "undef":true,
-      "unused":true,
       "eqnull": true,
       "jquery": true
    });
@@ -429,7 +428,6 @@ function testUrlJshint(url, resources, resourceTypeIndex, resourceIndex, callbac
    if (resource.type !== 'javascript') {
       testUrlJshint(url, resources, resourceTypeIndex, resourceIndex + 1, callback);
    } else {
-      console.error(resource);
       testResourceJshint(url, resource, function() {
          testUrlJshint(url, resources, resourceTypeIndex, resourceIndex + 1, callback);
       });
