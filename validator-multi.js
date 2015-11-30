@@ -68,7 +68,7 @@ function genAutoTest(url, task, functionName, args, resultChecker) {
       args.push(function(errorcode, errormsg) {
          if (!checkCallback(url, functionName)) {return;}
          window.clearTimeout(timeout);
-         addLog('error', url, 'error in task.getViews: '+errormsg);
+         addLog('error', url, 'error in task.'+functionName+': '+errorcode+' '+errormsg);
          callback();
       });
       updateStatus(url, 'calling task.'+functionName+'...');
