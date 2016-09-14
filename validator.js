@@ -92,7 +92,7 @@ function loadUrl () {
 
 function msgLog(msg) {
    console.log(msg);
-   $('.messages').append(msg+'<br>');
+   $('.messages').append('<div style="width:600px;overflow:auto">'+ $('<div />').text(msg).html() + '</div>');
 }
 
 function clearLogs() {
@@ -216,7 +216,7 @@ function reloadAnswer() {
 function getAnswer() {
    msgLog('calling task.getAnswer()..');
    task.getAnswer(function(answer) {
-      msgLog('got answer: '+answer);
+      msgLog('got answer: ' + answer);
    });
 }
 
