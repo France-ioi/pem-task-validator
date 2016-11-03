@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="fr">
+   <head>
+      <meta charset="utf-8">
+      <title>PEM task validator</title>
+      <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
+      <script type="text/javascript" src="bower_components/jquery/dist/jquery.min.js"></script>
+      <script type="text/javascript" src="bower_components/jschannel/src/jschannel.js"></script>
+      <script type="text/javascript" src="bower_components/jshint/dist/jshint.js"></script>
+      <style>
+         #task-view {
+            visibility:hidden;
+            width:800px;
+            height:800px;
+         }
+         .error {
+            color:#ff0000;
+         }
+         #user-input {
+            display:none;
+         }
+      </style>
+      <script>
+         function textAreaAdjust(o) {
+             o.style.height = "1px";
+             o.style.height = (25+o.scrollHeight)+"px";
+         }
+         function loadAndStart() {
+            var url = "bower_components/pem-platform/task-pr.js";
+            if ($('#samedomain').is(':checked')) {
+               url = "bower_components/pem-platform/task-xd-pr.js";
+            }
+            $.getScript(url, function() {
+               setTimeout(function() {
+                  $.getScript("validator-multi.js", function() {
+                     setTimeout(window.startMultiValidation, 0);
+                  });
+               }, 0);
+            });
+         }
+         function selectText(containerid) {
+            var node = document.getElementById( containerid );
+            if ( document.selection ) {
+               var range = document.body.createTextRange();
+               range.moveToElementText( node  );
+               range.select();
+            } else if ( window.getSelection ) {
+               var range = document.createRange();
+               range.selectNodeContents( node );
+               window.getSelection().removeAllRanges();
+               window.getSelection().addRange( range );
+            }
+         }
+      </script>
+      <style>
+         body {
+            margin-left: auto;
+            margin-right:auto;
+            max-width: 900px;
+         }
+      </style>
+   </head>
+   <body>
+      <h1>PEM Task Validator</h1>
+      <div id="step1">
+         <p>Fill the following form with the URLs you would like to test (one URL per line):</p>
+         <textarea id="urls" cols="100" onkeyup="textAreaAdjust(this)" style="overflow:hidden">
+http://eroux.fr/bebras-platform/teacherInterface/bebras-tasks/2011/2011-FR-06/index.html
+         </textarea>
+      </div>
+      <div id="step2">
+         <input id="jshint" type="checkbox" name="jshint" checked="checked">Run jshint
+         <input id="samedomain" type="checkbox" name="samedomain">Cross domain
+      </div>
+      <button onclick="loadAndStart()">Démarrer</button>
+      <p id="status"></p>
+      <div id="user-input">
+         <p id="message"></p>
+         <button id="button-ok">Ok</button>
+         <button id="button-nok">Non ok</button>
+         <button id="button-idontknow">I don't know</button>
+      </div>
+      <iframe src="" id="task-view" style="visibility:hidden;"></iframe>
+      <button id="copyButton" style="display:none;" onclick="selectText('log');">Select report for copy</button>
+      <div id="log"></div>
+   </body>
+</html>

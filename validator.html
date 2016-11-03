@@ -2,71 +2,261 @@
 <html lang="fr">
    <head>
       <meta charset="utf-8">
-      <title>PEM task validator (cross domain)</title>
+      <title>PEM task validator</title>
+      <link rel="stylesheet" href="bower_components/jquery-ui/themes/base/jquery-ui.min.css">
+      <script type="text/javascript" src="bower_components/jquery/dist/jquery.min.js"></script>
+      <script src="bower_components/jquery-ui/jquery-ui.min.js"></script>
       <style>
-         #task-view {
-            width: 800px;
-            border: 1px solid #000000;
-            margin: 20px;
+         div#popup { font-size: 62.5%; }
+         #dialog-form label, #dialog-form input { display:block; }
+         #dialog-form input.text { margin-bottom:12px; width:95%; padding: .4em; }
+         fieldset { padding:0; border:0; margin-top:25px; }
+         h1 { font-size: 1.2em; margin: .6em 0; }
+         .ui-dialog .ui-state-error { padding: .3em; }
+         .ui-dialog-buttonpane { font-size: 62.5%; }
+      </style>
+      <script>
+         var dialog;
+         $(function() {
+            var form,
+                    // From http://www.whatwg.org/specs/web-apps/current-work/multipage/states-of-the-type-attribute.html#e-mail-state-%28type=email%29
+                    name = $("#name"),
+                    comment = $("#comment"),
+                    allFields = $([]).add(name).add(comment),
+                    tips = $(".validateTips");
+
+            function updateTips(t) {
+               tips
+                       .text(t)
+                       .addClass("ui-state-highlight");
+               setTimeout(function() {
+                  tips.removeClass("ui-state-highlight", 1500);
+               }, 500);
+            }
+
+            function addJson() {
+               allFields.removeClass("ui-state-error");
+               curJson.name = name.val();
+               curJson.comment = comment.val();
+               dialog.dialog("close");
+               writeInViewer(curJson);
+            }
+
+            dialog = $("#dialog-form").dialog({
+               autoOpen: false,
+               height: 250,
+               width: 350,
+               modal: true,
+               buttons: {
+                  "Add to JSON-viewer": addJson,
+                  Cancel: function() {
+                     dialog.dialog("close");
+                  }
+               },
+               close: function() {
+                  form[ 0 ].reset();
+                  allFields.removeClass("ui-state-error");
+               }
+            });
+
+            form = dialog.find("form").on("submit", function(event) {
+               event.preventDefault();
+               addJson();
+            });
+         });
+      </script>
+      <style>
+         #right-container {
+            width:800px;
+            margin:20px;
             float:right;
+         }
+         #task-view {
+            width:800px;
+            border:1px solid #000000;
+            margin-top:100px;
             height:500px;
+         }
+         #select-domain {
+            display:inline;
          }
          .hidden {
             display:none;
          }
+         .error {
+            display:inline;
+            visibility:hidden;
+            color:#ff0000;
+         }
       </style>
+      <style type="text/css">
+         .tab
+         {
+            display:inline-block;
+            margin-left:3px;
+            margin-right:3px;
+            padding:3px;
+            border:1px solid black;
+            cursor:pointer;
+         }
+         .tab_unselected
+         {
+            background:#bbbbbb;
+            border-bottom:1px solid black;
+         }
+         .tab_selected
+         {
+            background:#dddddd;
+            border-bottom:0px solid black;
+            padding-bottom:4px;
+         }
+         .tab_content
+         {
+            background-color:#dddddd;
+            border:1px solid black;
+            margin-top:-1px;
+            padding:5px;
+            display:none;
+         }
+         ul
+         {
+            margin-top:0px;
+            margin-bottom:0px;
+            margin-left:-10px
+         }
+         h1
+         {
+            margin:0px;
+            padding:0px;
+         }
+      </style>
+      <script type="text/javascript">
+         function change_tab(name)
+         {
+            $('#tab_' + anc_tab).attr('class', 'tab_unselected tab');
+            $('#tab_' + name).attr('class', 'tab_selected tab');
+            $('#tab_content_' + anc_tab).hide();
+            $('#tab_content_' + name).show();
+            anc_tab = name;
+            if (jsonContent[name].type === "answer") {
+               reloadAnswer(jsonContent[name].content);
+               testAnswer(name);
+            }
+            else {
+               reloadState(jsonContent[name].content);
+            }
+         }
+      </script>
+      <script>
+         //redefined when task-pr is loaded
+         function loadUrl() {
+            $('#error-emptyDomain').css("visibility", "visible");
+         }
 
-      <script type="text/javascript" src="bower_components/jquery/dist/jquery.min.js"></script>
-      <script type="text/javascript" src="bower_components/pem-platform/task-pr.js"></script>
-      <script type="text/javascript" src="validator.js"></script>
+         function checkState(domain) {
+            $('#domain').prop('checked', domain);
+            $('#cross-domain').prop('checked', !domain);
+         }
+
+         function loadTaskPr(domain) {
+            $('#error-emptyDomain').css("visibility", "hidden");
+            $('#domain').attr("onclick", "checkState(" + domain + ");");
+            $('#cross-domain').attr("onclick", "checkState(" + domain + ");");
+            if (domain) {
+               $.getScript("bower_components/pem-platform/task-pr.js");
+            }
+            else {
+               $.getScript("bower_components/pem-platform/task-xd-pr.js");
+            }
+            $.getScript("validator.js");
+         }
+      </script>
    </head>
    <body>
-      <p>This page will help you validate a task against PEM API specification (same domain version).</p>
-      <iframe src="" id="task-view"></iframe>
+      <p>This page will help you validate a task against PEM API specification.</p>
+      <div id="right-container">
+         <div class="tab_system">
+            <div class="tabs"></div>
+            <div class="tab_contents"></div>
+         </div>
+         <iframe src="" id="task-view"></iframe>
+      </div>
       <br>
+      Validator:
+      <div id="select-domain">
+         <input id="domain" type="radio" name="domain" onclick="loadTaskPr(1);"> Domain
+         <input id="cross-domain" type="radio" name="domain" onclick="loadTaskPr(0);"> Cross-domain
+      </div>
+      <br>
+      <button onclick="loadJSON();">load JSON (text or local url):</button><input type="text" size="50" id="json" />
+      <textarea id="json-viewer" rows="4" cols="50">{}</textarea>
+      <button onclick="gradeAll();">grade all answers</button>
+      <span class="error" id="error-emptyJSONUrl">Warning, empty field.</span><br>
       answerToken (gradeTask): date, platform, idUser, idItem, sAnswer
       Use tokens? <input type="checkbox" name="bHintsAllowed" value="1" onchange="toggleTokens();"><br>
       <div id="main-token-fields" class="hidden">
-         Public key: <input type="text" size="50" id="privateKey" value=""></input><br>
-         Private key: <input type="text" size="50" id="privateKey" value=""></input><br>
+         private key:<br><textarea id="privatekey" rows="15" cols="66"></textarea><br>
+         <!--         public key:<br><textarea id="publickey" rows="15" cols="66"></textarea><br>-->
          Token fields:<br>
-         date: <input type="text" size="50" id="date" value=""></input><br>
-         idUser:  <input type="text" size="50" id="idUser" value="1"></input><br>
-         idItem:  <input type="text" size="50" id="idItem" value="1"></input><br>
-         platform: <input type="text" size="50" id="platform" value="1"></input><br>
-         bHintsAllowed: <input type="checkbox" name="bHintsAllowed" value="1"><br>
-         nbHintsGiven: <input type="text" size="50" id="nbHintsGiven" value="1"></input><br>
-         bAuthorsDisplayed: <input type="checkbox" name="bAuthorsDisplayed" value="1"><br>
-         bAllowPrivateMetaData: <input type="checkbox" name="bAllowPrivateMetaData" value="1"><br>
-         bReadOnly: <input type="checkbox" name="bReadOnly" value="1"><br>
-         bAllowGrading: <input type="checkbox" name="bAllowGrading" value="1"><br>
-         bHasFullAccess: <input type="checkbox" name="bHasFullAccess" value="1"><br>
-         bAccessSolutions: <input type="checkbox" name="bAccessSolutions" value="1"><br>
-         bSubmissionPossible: <input type="checkbox" name="bSubmissionPossible" value="1"><br>
+         date: <input type="text" size="50" id="date" value="" /><br>
+         idUser:  <input type="text" size="50" id="idUser" value="1" /><br>
+         idItem:  <input type="text" size="50" id="idItem" value="1" /><br>
+         platform: <input type="text" size="50" id="platform" value="1" /><br>
+         bHintsAllowed: <input type="checkbox" name="bHintsAllowed" checked><br>
+         nbHintsGiven: <input type="text" size="50" id="nbHintsGiven" value="1" /><br>
+         bAuthorsDisplayed: <input type="checkbox" name="bAuthorsDisplayed" checked><br>
+         bAllowPrivateMetaData: <input type="checkbox" name="bAllowPrivateMetaData" checked><br>
+         bReadOnly: <input type="checkbox" name="bReadOnly" checked><br>
+         bAllowGrading: <input type="checkbox" name="bAllowGrading" checked><br>
+         bHasFullAccess: <input type="checkbox" name="bHasFullAccess" checked><br>
+         bAccessSolutions: <input type="checkbox" name="bAccessSolutions" checked><br>
+         bSubmissionPossible: <input type="checkbox" name="bSubmissionPossible" checked><br>
       </div>
-      <button onclick="setToken()">set token (do it before loading url)</button>
-      <button onclick="loadUrl()">load url in iframe (does not load task)</button><input type="text" size="50" id="taskUrl" value=""></input><br>
+      <button onclick="getToken()">get token (do it before loading url)</button>
+      <button onclick="loadUrl()">load url in iframe (does not load task)</button><input type="text" size="50" id="taskUrl" value="" />
+      <span class="error" id="error-emptyTaskUrl">Warning, empty field.</span>
+      <br><span class="error" id="error-emptyDomain">Please choose between same domain and cross domain.</span>
       <button onclick="loadTask();">load task (all views)</button><br>
       <button onclick="getViews();">get views</button><br>
       <button onclick="getMetaData();">get metadata</button><br>
-      <button onclick="showViews();">show views: </button><input size="50" id="views" value='{"task":true,"solution":true,"hints":true,"editor":true}'></input><br>
+      <button onclick="showViews();">show views: </button><input size="50" id="views" value='{"task":true,"solution":true,"hints":true,"editor":true}' />
+      <span class="error" id="error-views">Warning, empty field.</span><br>
       <button onclick="getHeight();">get height</button><br>
-      <button onclick="reloadAnswer();">reload answer: </button><input size="50" id="answer" value=''></input><br>
-      <button onclick="getAnswer();">get answer</button><br>
-      <button onclick="reloadState();">reload state: </button><input size="50" id="state" value=''></input><br>
-      <button onclick="getState();">get state</button><br>
-      <button onclick="updateToken();">update token</button><br>
-      <div id="grade-token-fields"  class="hidden">
+      <button onclick="reloadAnswer();">reload answer: </button><input size="50" id="answer" value='' />
+      <span class="error" id="error-answer">Warning, empty field.</span><br>
+      <button onclick="getAnswer();">get answer</button><button onclick="addToJSON('answer');">add to JSON</button><br>
+      <button onclick="reloadState();">reload state: </button><input size="50" id="state" value='' />
+      <span class="error" id="error-state">Warning, empty field.</span><br>
+      <button onclick="getState();">get state</button><button onclick="addToJSON('state');">add to JSON</button>
+      <button onclick="updateToken();">update token (takes values of the first form)</button><br>
+      <div id="grade-token-fields" class="hidden">
          Grade token fields:<br>
-         date: <input type="text" size="50" id="grade-date" value=""></input><br>
-         idUser:  <input type="text" size="50" id="grade-idUser" value="1"></input><br>
-         idItem:  <input type="text" size="50" id="grade-idItem" value="1"></input><br>
-         platform: <input type="text" size="50" id="grade-platform" value="1"></input><br>
-         sAnswer: <input type="text" size="50" id="grade-sAnswer" value="1"></input><br>
+         date: <input type="text" size="50" id="grade-date" value="" /><br>
+         idUser:  <input type="text" size="50" id="grade-idUser" value="1" /><br>
+         idItem:  <input type="text" size="50" id="grade-idItem" value="1" /><br>
+         platform: <input type="text" size="50" id="grade-platform" value="1" /><br>
+         sAnswer (must match graded answer): <input type="text" size="50" id="grade-sAnswer" value="1" /><br>
       </div>
-      <button onclick="gradeTask();">grade task</button><input size="50" id="graderanswer" value=''></input><br>
+      <button onclick="gradeTask();">grade answer:</button><input size="50" id="graderanswer" value='' />
+      <span class="error" id="error-graderanswer">Warning, empty field.</span><br>
       <button onclick="unloadTask();">unload task</button><br>
       <button onclick="clearLogs();">clear logs</button><br>
-      <div><pre class="messages" style="clear: left;"></pre></div>
+      <textarea id="code-viewer" rows="4" cols="50"></textarea>
+      <div><pre class="messages" style="clear:left;"></pre></div>
+      <div id="popup">
+         <div id="dialog-form" style="font-size: 62.5%;" title="Add an entry">
+            <form>
+               <fieldset>
+                  <label for="name">Name</label>
+                  <input type="text" name="name" id="name" value="name" class="text ui-widget-content ui-corner-all">
+                  <label for="comment">Comment</label>
+                  <input type="text" name="comment" id="comment" value="comment" class="text ui-widget-content ui-corner-all">
+                  
+                  <!-- Allow form submission with keyboard without duplicating the dialog button -->
+                  <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
+               </fieldset>
+            </form>
+         </div>
+      </div>
    </body>
 </html>

@@ -8,6 +8,14 @@
   "description": "validator for pem tasks",
   "license": "MIT",
   "dependencies": {
-    "pem-platform": "France-ioi/pem-platform"
+    "pem-platform": "France-ioi/pem-platform",
+    "jschannel": "https://github.com/yochannah/jschannel.git#f2bcb86",
+    "jquery": "*",
+    "jquery-ui": "*",
+    "bootstrap": "*",
+    "jshint": "*"
+  },
+  "resolutions": {
+    "jschannel": "f2bcb86"
   }
 }
