@@ -9,6 +9,7 @@
   "license": "MIT",
   "dependencies": {
     "pem-platform": "France-ioi/pem-platform",
+    "pem-task": "France-ioi/pem-task",
     "jschannel": "https://github.com/yochannah/jschannel.git#f2bcb86",
     "jquery": "*",
     "jquery-ui": "*",
