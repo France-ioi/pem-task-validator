@@ -162,13 +162,14 @@
             $('#error-emptyDomain').css("visibility", "hidden");
             $('#domain').attr("onclick", "checkState(" + domain + ");");
             $('#cross-domain').attr("onclick", "checkState(" + domain + ");");
-            if (domain) {
+            if(domain) {
                $.getScript("bower_components/pem-platform/task-pr.js");
-            }
-            else {
+            } else {
+               $.getScript("bower_components/jschannel/src/jschannel.js");
                $.getScript("bower_components/pem-platform/task-xd-pr.js");
             }
             $.getScript("validator.js");
+            $('#main').show();
          }
       </script>
    </head>
@@ -187,75 +188,78 @@
          <input id="domain" type="radio" name="domain" onclick="loadTaskPr(1);"> Domain
          <input id="cross-domain" type="radio" name="domain" onclick="loadTaskPr(0);"> Cross-domain
       </div>
-      <br>
-      <button onclick="loadJSON();">load JSON (text or local url):</button><input type="text" size="50" id="json" />
-      <textarea id="json-viewer" rows="4" cols="50">{}</textarea>
-      <button onclick="gradeAll();">grade all answers</button>
-      <span class="error" id="error-emptyJSONUrl">Warning, empty field.</span><br>
-      answerToken (gradeTask): date, platform, idUser, idItem, sAnswer
-      Use tokens? <input type="checkbox" name="bHintsAllowed" value="1" onchange="toggleTokens();"><br>
-      <div id="main-token-fields" class="hidden">
-         private key:<br><textarea id="privatekey" rows="15" cols="66"></textarea><br>
-         <!--         public key:<br><textarea id="publickey" rows="15" cols="66"></textarea><br>-->
-         Token fields:<br>
-         date: <input type="text" size="50" id="date" value="" /><br>
-         idUser:  <input type="text" size="50" id="idUser" value="1" /><br>
-         idItem:  <input type="text" size="50" id="idItem" value="1" /><br>
-         platform: <input type="text" size="50" id="platform" value="1" /><br>
-         bHintsAllowed: <input type="checkbox" name="bHintsAllowed" checked><br>
-         nbHintsGiven: <input type="text" size="50" id="nbHintsGiven" value="1" /><br>
-         bAuthorsDisplayed: <input type="checkbox" name="bAuthorsDisplayed" checked><br>
-         bAllowPrivateMetaData: <input type="checkbox" name="bAllowPrivateMetaData" checked><br>
-         bReadOnly: <input type="checkbox" name="bReadOnly" checked><br>
-         bAllowGrading: <input type="checkbox" name="bAllowGrading" checked><br>
-         bHasFullAccess: <input type="checkbox" name="bHasFullAccess" checked><br>
-         bAccessSolutions: <input type="checkbox" name="bAccessSolutions" checked><br>
-         bSubmissionPossible: <input type="checkbox" name="bSubmissionPossible" checked><br>
-      </div>
-      <button onclick="getToken()">get token (do it before loading url)</button>
-      <button onclick="loadUrl()">load url in iframe (does not load task)</button><input type="text" size="50" id="taskUrl" value="" />
-      <span class="error" id="error-emptyTaskUrl">Warning, empty field.</span>
-      <br><span class="error" id="error-emptyDomain">Please choose between same domain and cross domain.</span>
-      <button onclick="loadTask();">load task (all views)</button><br>
-      <button onclick="getViews();">get views</button><br>
-      <button onclick="getMetaData();">get metadata</button><br>
-      <button onclick="showViews();">show views: </button><input size="50" id="views" value='{"task":true,"solution":true,"hints":true,"editor":true}' />
-      <span class="error" id="error-views">Warning, empty field.</span><br>
-      <button onclick="getHeight();">get height</button><br>
-      <button onclick="reloadAnswer();">reload answer: </button><input size="50" id="answer" value='' />
-      <span class="error" id="error-answer">Warning, empty field.</span><br>
-      <button onclick="getAnswer();">get answer</button><button onclick="addToJSON('answer');">add to JSON</button><br>
-      <button onclick="reloadState();">reload state: </button><input size="50" id="state" value='' />
-      <span class="error" id="error-state">Warning, empty field.</span><br>
-      <button onclick="getState();">get state</button><button onclick="addToJSON('state');">add to JSON</button>
-      <button onclick="updateToken();">update token (takes values of the first form)</button><br>
-      <div id="grade-token-fields" class="hidden">
-         Grade token fields:<br>
-         date: <input type="text" size="50" id="grade-date" value="" /><br>
-         idUser:  <input type="text" size="50" id="grade-idUser" value="1" /><br>
-         idItem:  <input type="text" size="50" id="grade-idItem" value="1" /><br>
-         platform: <input type="text" size="50" id="grade-platform" value="1" /><br>
-         sAnswer (must match graded answer): <input type="text" size="50" id="grade-sAnswer" value="1" /><br>
-      </div>
-      <button onclick="gradeTask();">grade answer:</button><input size="50" id="graderanswer" value='' />
-      <span class="error" id="error-graderanswer">Warning, empty field.</span><br>
-      <button onclick="unloadTask();">unload task</button><br>
-      <button onclick="clearLogs();">clear logs</button><br>
-      <textarea id="code-viewer" rows="4" cols="50"></textarea>
-      <div><pre class="messages" style="clear:left;"></pre></div>
-      <div id="popup">
-         <div id="dialog-form" style="font-size: 62.5%;" title="Add an entry">
-            <form>
-               <fieldset>
-                  <label for="name">Name</label>
-                  <input type="text" name="name" id="name" value="name" class="text ui-widget-content ui-corner-all">
-                  <label for="comment">Comment</label>
-                  <input type="text" name="comment" id="comment" value="comment" class="text ui-widget-content ui-corner-all">
-                  
-                  <!-- Allow form submission with keyboard without duplicating the dialog button -->
-                  <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
-               </fieldset>
-            </form>
+
+      <div id="main" style="display: none">
+         <br>
+         <button onclick="loadJSON();">load JSON (text or local url):</button><input type="text" size="50" id="json" />
+         <textarea id="json-viewer" rows="4" cols="50">{}</textarea>
+         <button onclick="gradeAll();">grade all answers</button>
+         <span class="error" id="error-emptyJSONUrl">Warning, empty field.</span><br>
+         answerToken (gradeTask): date, platform, idUser, idItem, sAnswer
+         Use tokens? <input type="checkbox" name="bHintsAllowed" value="1" onchange="toggleTokens();"><br>
+         <div id="main-token-fields" class="hidden">
+            private key:<br><textarea id="privatekey" rows="15" cols="66"></textarea><br>
+            <!--         public key:<br><textarea id="publickey" rows="15" cols="66"></textarea><br>-->
+            Token fields:<br>
+            date: <input type="text" size="50" id="date" value="" /><br>
+            idUser:  <input type="text" size="50" id="idUser" value="1" /><br>
+            idItem:  <input type="text" size="50" id="idItem" value="1" /><br>
+            platform: <input type="text" size="50" id="platform" value="1" /><br>
+            bHintsAllowed: <input type="checkbox" name="bHintsAllowed" checked><br>
+            nbHintsGiven: <input type="text" size="50" id="nbHintsGiven" value="1" /><br>
+            bAuthorsDisplayed: <input type="checkbox" name="bAuthorsDisplayed" checked><br>
+            bAllowPrivateMetaData: <input type="checkbox" name="bAllowPrivateMetaData" checked><br>
+            bReadOnly: <input type="checkbox" name="bReadOnly" checked><br>
+            bAllowGrading: <input type="checkbox" name="bAllowGrading" checked><br>
+            bHasFullAccess: <input type="checkbox" name="bHasFullAccess" checked><br>
+            bAccessSolutions: <input type="checkbox" name="bAccessSolutions" checked><br>
+            bSubmissionPossible: <input type="checkbox" name="bSubmissionPossible" checked><br>
+         </div>
+         <button onclick="getToken()">get token (do it before loading url)</button>
+         <button onclick="loadUrl()">load url in iframe (does not load task)</button><input type="text" size="50" id="taskUrl" value="/test-task.html" />
+         <span class="error" id="error-emptyTaskUrl">Warning, empty field.</span>
+         <br><span class="error" id="error-emptyDomain">Please choose between same domain and cross domain.</span>
+         <button onclick="loadTask();">load task (all views)</button><br>
+         <button onclick="getViews();">get views</button><br>
+         <button onclick="getMetaData();">get metadata</button><br>
+         <button onclick="showViews();">show views: </button><input size="50" id="views" value='{"task":true,"solution":true,"hints":true,"editor":true}' />
+         <span class="error" id="error-views">Warning, empty field.</span><br>
+         <button onclick="getHeight();">get height</button><br>
+         <button onclick="reloadAnswer();">reload answer: </button><input size="50" id="answer" value='' />
+         <span class="error" id="error-answer">Warning, empty field.</span><br>
+         <button onclick="getAnswer();">get answer</button><button onclick="addToJSON('answer');">add to JSON</button><br>
+         <button onclick="reloadState();">reload state: </button><input size="50" id="state" value='' />
+         <span class="error" id="error-state">Warning, empty field.</span><br>
+         <button onclick="getState();">get state</button><button onclick="addToJSON('state');">add to JSON</button>
+         <button onclick="updateToken();">update token (takes values of the first form)</button><br>
+         <div id="grade-token-fields" class="hidden">
+            Grade token fields:<br>
+            date: <input type="text" size="50" id="grade-date" value="" /><br>
+            idUser:  <input type="text" size="50" id="grade-idUser" value="1" /><br>
+            idItem:  <input type="text" size="50" id="grade-idItem" value="1" /><br>
+            platform: <input type="text" size="50" id="grade-platform" value="1" /><br>
+            sAnswer (must match graded answer): <input type="text" size="50" id="grade-sAnswer" value="1" /><br>
+         </div>
+         <button onclick="gradeTask();">grade answer:</button><input size="50" id="graderanswer" value='' />
+         <span class="error" id="error-graderanswer">Warning, empty field.</span><br>
+         <button onclick="unloadTask();">unload task</button><br>
+         <button onclick="clearLogs();">clear logs</button><br>
+         <textarea id="code-viewer" rows="4" cols="50"></textarea>
+         <div><pre class="messages" style="clear:left;"></pre></div>
+         <div id="popup">
+            <div id="dialog-form" style="font-size: 62.5%;" title="Add an entry">
+               <form>
+                  <fieldset>
+                     <label for="name">Name</label>
+                     <input type="text" name="name" id="name" value="name" class="text ui-widget-content ui-corner-all">
+                     <label for="comment">Comment</label>
+                     <input type="text" name="comment" id="comment" value="comment" class="text ui-widget-content ui-corner-all">
+
+                     <!-- Allow form submission with keyboard without duplicating the dialog button -->
+                     <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
+                  </fieldset>
+               </form>
+            </div>
          </div>
       </div>
    </body>
