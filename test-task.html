@@ -5,6 +5,9 @@
         <title>Test task</title>
         <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
         <script type="text/javascript" src="bower_components/jquery/dist/jquery.min.js"></script>
+        <script type="text/javascript" src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
+        <script type="text/javascript" src="bower_components/js-cookie/src/js.cookie.js"></script>
+        <script type="text/javascript" src="bower_components/bootbox.js/bootbox.js"></script>
         <script type="text/javascript" src="bower_components/pem-task/platform-pr.js"></script>
         <!-- <script type="text/javascript" src="bower_components/pem-task/miniPlatform.js"></script> -->
         <script type="text/javascript" src="test-task.js"></script>
@@ -12,11 +15,41 @@
     <body>
         <div class="panel panel-default">
             <div>
-                <button class="btn btn-xs btn-primary" id="btn-task-random-height">Set random task height</button>
-                <button class="btn btn-xs btn-primary" id="btn-task-actual-height">Set actual task height</button>
+                <button class="btn btn-primary" id="btn-settings">Settings</button>
             </div>
             <div id="counters"></div>
         </div>
         <div id="output"></div>
+
+        <div class="hidden">
+            <form id="settings">
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" name="manual_callback"> Manual callback
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label>Custom height</label>
+                    <input type="text" class="form-control" name="custom_height">
+                </div>
+                <div class="form-group">
+                    <label>Answer</label>
+                    <input type="text" class="form-control" name="answer">
+                </div>
+                <div class="form-group">
+                    <label>State</label>
+                    <input type="text" class="form-control" name="state">
+                </div>
+                <div class="form-group">
+                    <label>Views</label>
+                    <textarea class="form-control" name="views" rows="4"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Metadata</label>
+                    <textarea class="form-control" name="metadata" rows="4"></textarea>
+                </div>
+            </form>
+
+        </div>
     </body>
 </html>
