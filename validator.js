@@ -36,14 +36,14 @@ function getTokenParams() {
    res['idItem'] = $('#idItem').val().toString();
    res['platform'] = $('#platform').val().toString();
    res['nbHintsGiven'] = parseInt($('#nbHintsGiven').val());
-   res['bHintsAllowed'] = $('#bHintsAllowed').is(":checked");
-   res['bAuthorsDisplayed'] = $('#bAuthorsDisplayed').is(":checked");
-   res['bAllowPrivateMetaData'] = $('#bAllowPrivateMetaData').is(":checked");
-   res['bReadOnly'] = $('#bReadOnly').is(":checked");
-   res['bAllowGrading'] = $('#bAllowGrading').is(":checked");
-   res['bHasFullAccess'] = $('#bHasFullAccess').is(":checked");
-   res['bAccessSolutions'] = $('#bAccessSolutions').is(":checked");
-   res['bSubmissionPossible'] = $('#bSubmissionPossible').is(":checked");
+   res['bHintsAllowed'] = $('#bHintsAllowed').prop("checked");
+   res['bAuthorsDisplayed'] = $('#bAuthorsDisplayed').prop("checked");
+   res['bAllowPrivateMetaData'] = $('#bAllowPrivateMetaData').prop("checked");
+   res['bReadOnly'] = $('#bReadOnly').prop("checked");
+   res['bAllowGrading'] = $('#bAllowGrading').prop("checked");
+   res['bHasFullAccess'] = $('#bHasFullAccess').prop("checked");
+   res['bAccessSolutions'] = $('#bAccessSolutions').prop("checked");
+   res['bSubmissionPossible'] = $('#bSubmissionPossible').prop("checked");
    return res;
 }
 
@@ -59,8 +59,13 @@ function getGraderTokenParams() {
 
 function buildToken(grader, callback) {
    var tokenParams = grader ? getGraderTokenParams() : getTokenParams();
+   console.log(tokenParams)
    msgLog('building token...');
-   $.post('buildToken.php', {privateKey: privateKey, tokenParams: tokenParams}, function(token) {
+   var p = {
+      privateKey: privateKey,
+      tokenParams: JSON.stringify(tokenParams)
+   }
+   $.post('buildToken.php', p, function(token) {
       console.log('token: '+token);
       msgLog('token received');
       callback(token);
