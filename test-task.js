@@ -206,6 +206,19 @@ var test_tool = {
     },
 
 
+    testViews: function(views) {
+        if(typeof views != "object") {
+            output.error(fn + ': views must be an object');
+        } else {
+            for(var view in views) {
+                if(!settings.data.views.hasOwnProperty(view)) {
+                    output.error('Unknown view: ' + view);
+                }
+            }
+        }
+    },
+
+
     updateMethodCounter: function(method) {
         if(this.method_counters.hasOwnProperty(method)) {
             this.method_counters[method]++;
@@ -261,25 +274,16 @@ var task = {
     flags: {
         is_metadata_loaded: false,
         is_grader_loaded: false,
+        token: null
     },
 
-    _testViews: function(views) {
-        if(typeof views != "object") {
-            output.error(fn + ': views must be an object');
-        } else {
-            for(var view in views) {
-                if(!settings.data.views.hasOwnProperty(view)) {
-                    output.error('Unknown view: ' + view);
-                }
-            }
-        }
-    },
+
 
     load: function(views, callback, errorCallback) {
         var fn = 'load';
         test_tool.beginFunc(fn, callback, errorCallback);
         output.log('.load views: ' + JSON.stringify(views))
-        this._testViews(views);
+        test_tool.testViews(views);
         this.flags.is_metadata_loaded = views.hasOwnProperty('metadata')
         this.flags.is_grader_loaded = views.hasOwnProperty('grader')
         test_tool.endFunc(fn, callback, errorCallback);
@@ -295,7 +299,7 @@ var task = {
         var fn = 'showViews'
         test_tool.beginFunc(fn, callback, errorCallback);
         output.log('.showViews views: ' + JSON.stringify(views))
-        this._testViews(views);
+        test_tool.testViews(views);
 
         if(test_tool.removeStackItems(['getViews', 'load', 'getMetaData']).length > 0) {
             output.warning('Methods other than task.getViews, task.load and task.getMetaData has been called before task.showViews');
@@ -339,7 +343,23 @@ var task = {
             output.error('answer param does not corresponds to what task.getAnswer previously sent');
         }
         output.log('token = ' + JSON.stringify(answerToken));
-        test_tool.endFunc(fn, callback, errorCallback);
+
+        $.getJSON('test-token.php', { token: window.task_token } , function(res) {
+            if(res.success) {
+                $.getJSON('test-token.php', { token: answerToken } , function(res) {
+                    if(res.success) {
+                        output.log('Valid answer token');
+                    } else {
+                        output.error('Invalid answer token: ' + res.message);
+                    }
+                });
+            } else {
+                output.error('Invalid main token: ' + res.message);
+            }
+            test_tool.endFunc(fn, callback, errorCallback);
+        });
+
+
     },
 
     getHeight: function(callback, errorCallback) {
@@ -356,7 +376,15 @@ var task = {
         var fn = 'updateToken'
         test_tool.beginFunc(fn, callback, errorCallback);
         output.log('token = ' + JSON.stringify(token));
-        test_tool.endFunc(fn, callback, errorCallback);
+        window.task_token = token;
+        $.getJSON('test-token.php', { token: token }, function(res) {
+            if(res.success) {
+                output.log('Valid token');
+            } else {
+                output.error('Invalid token: ' + res.message);
+            }
+            test_tool.endFunc(fn, callback, errorCallback);
+        });
     },
 
     getState: function(callback, errorCallback) {
@@ -392,6 +420,8 @@ var task = {
 
 $('document').ready(function() {
     settings.load();
+    var re = new RegExp('[\?&]sToken=([^&#]*)').exec(window.location.href);
+    window.task_token = re && re.length && re[0] ? re[0] : '';
     platform.initWithTask(task);
     $('#btn-settings').click(function() {
         settings.show()
