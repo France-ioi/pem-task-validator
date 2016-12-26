@@ -346,13 +346,17 @@ var task = {
 
         $.getJSON('test-token.php', { token: window.task_token } , function(res) {
             if(res.success) {
-                $.getJSON('test-token.php', { token: answerToken } , function(res) {
-                    if(res.success) {
-                        output.log('Valid answer token');
-                    } else {
-                        output.error('Invalid answer token: ' + res.message);
-                    }
-                });
+                if(res.payload.bAllowGrading === true) {
+                    $.getJSON('test-token.php', { token: answerToken } , function(res) {
+                        if(res.success) {
+                            output.log('Valid answer token');
+                        } else {
+                            output.error('Invalid answer token: ' + res.message);
+                        }
+                    });
+                } else {
+                    output.error('General token does not allows grading');
+                }
             } else {
                 output.error('Invalid main token: ' + res.message);
             }
