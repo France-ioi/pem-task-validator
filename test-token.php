@@ -12,6 +12,12 @@
 
     try {
         $jws = JWS::load($_REQUEST['token']);
+        if(!$jws->verify(openssl_pkey_get_public('file://test-task.key.pub'))) {
+            return_json(array(
+                'success' => false,
+                'message' => 'Token verification failed.'
+            ));
+        }
     } catch(Exception $e) {
         return_json(array(
             'success' => false,
