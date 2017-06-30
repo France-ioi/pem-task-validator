@@ -1,0 +1,5 @@
+FROM node:8.1.2-alpine
+RUN apk --update add git openssl && rm /var/cache/apk/*
+RUN npm install -g bower
+WORKDIR /src
+CMD ["bower", "install"]
