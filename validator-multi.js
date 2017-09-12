@@ -315,6 +315,7 @@ function createPlatform(url, task) {
       if (success) {success();}
    };
    platform.updateHeight = function(height, success, error) {
+      addLog('warning', url, 'platform.updateHeight is deprecated');
       if (parseInt(height) !== height) {
          addLog('error', url, 'receiving platform.updateHeight with non-integer argument');
          if (success) {success();}
@@ -327,7 +328,24 @@ function createPlatform(url, task) {
       }
       $('#task-view').height(height);
       addLog('debug', url, 'receiving platform.updateHeight(' + height + '), setting height of iframe');
-      
+   };
+   platform.updateDisplay = function(data, success, error) {
+      addLog('debug', url, 'receiving platform.updateDisplay(' + JSON.stringify(data) + ')');
+      if(data.height) {
+         var height = data.height;
+         if (parseInt(height) !== height) {
+            addLog('error', url, 'receiving platform.updateDisplay with non-integer height');
+            if (success) {success();}
+            return;
+         }
+         if (height < 1) {
+            addLog('error', url, 'receiving platform.updateDisplay with height < 1');
+            if (success) {success();}
+            return;
+         }
+         $('#task-view').height(height);
+      }
+      if (success) {success();}
    };
    platform.askHint = function(success, error) {
       addLog('debug', url, 'receiving platform.askHint()');
